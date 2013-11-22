@@ -1,0 +1,7 @@
+.settings/
+target/
+.classpath
+.project
+.springbeans
+mem.h2.db
+mem.trace.db
