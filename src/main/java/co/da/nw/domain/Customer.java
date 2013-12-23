@@ -159,47 +159,47 @@ public final class Customer implements DomainObject, Comparable<Customer> {
                     "customerId must be less than or equal to %s characters", MAX_LENGTH_COMPANY_NM);
 
             if (contactNm != null) {
-                Preconditions.checkArgument(contactNm.length() < MAX_LENGTH_CONTACT_NM,
+                Preconditions.checkArgument(contactNm.length() <= MAX_LENGTH_CONTACT_NM,
                         "contactNm must be less than or equal to %s characters", MAX_LENGTH_CONTACT_NM);
             }
 
             if (contactTitle != null) {
-                Preconditions.checkArgument(contactTitle.length() < MAX_LENGTH_CONTACT_TITLE,
+                Preconditions.checkArgument(contactTitle.length() <= MAX_LENGTH_CONTACT_TITLE,
                         "contactTitle must be less than or equal to %s characters", MAX_LENGTH_CONTACT_TITLE);
             }
 
             if (address != null) {
-                Preconditions.checkArgument(address.length() < MAX_LENGTH_ADDRESS,
+                Preconditions.checkArgument(address.length() <= MAX_LENGTH_ADDRESS,
                         "address must be less than or equal to %s characters", MAX_LENGTH_ADDRESS);
             }
 
             if (city != null) {
-                Preconditions.checkArgument(city.length() < MAX_LENGTH_CITY,
+                Preconditions.checkArgument(city.length() <= MAX_LENGTH_CITY,
                         "city must be less than or equal to %s characters", MAX_LENGTH_CITY);
             }
 
             if (region != null) {
-                Preconditions.checkArgument(region.length() < MAX_LENGTH_REGION,
+                Preconditions.checkArgument(region.length() <= MAX_LENGTH_REGION,
                         "region must be less than or equal to %s characters", MAX_LENGTH_REGION);
             }
 
             if (postalCode != null) {
-                Preconditions.checkArgument(postalCode.length() < MAX_LENGTH_POSTAL_CD,
+                Preconditions.checkArgument(postalCode.length() <= MAX_LENGTH_POSTAL_CD,
                         "postalCd must be less than or equal to %s characters", MAX_LENGTH_POSTAL_CD);
             }
 
             if (country != null) {
-                Preconditions.checkArgument(country.length() < MAX_LENGTH_COUNTRY,
+                Preconditions.checkArgument(country.length() <= MAX_LENGTH_COUNTRY,
                         "country must be less than or equal to %s characters", MAX_LENGTH_COUNTRY);
             }
 
             if (phone != null) {
-                Preconditions.checkArgument(phone.length() < MAX_LENGTH_PHONE,
+                Preconditions.checkArgument(phone.length() <= MAX_LENGTH_PHONE,
                         "phone must be less than or equal to %s characters", MAX_LENGTH_PHONE);
             }
 
             if (fax != null) {
-                Preconditions.checkArgument(fax.length() < MAX_LENGTH_FAX,
+                Preconditions.checkArgument(fax.length() <= MAX_LENGTH_FAX,
                         "fax must be less than or equal to %s characters", MAX_LENGTH_FAX);
             }
         }
