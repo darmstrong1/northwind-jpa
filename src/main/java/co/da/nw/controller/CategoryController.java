@@ -3,207 +3,169 @@ package co.da.nw.controller;
 import java.util.List;
 
 import javax.annotation.Resource;
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import co.da.nw.domain.Category;
 import co.da.nw.dto.CategoryDTO;
-import co.da.nw.dto.SearchDTO;
+import co.da.nw.dto.reply.JqgridReply;
+import co.da.nw.dto.reply.StatusReply;
 import co.da.nw.service.CategoryService;
+import co.da.nw.util.JqgridFilter;
+import co.da.nw.util.Mapper;
+
+import com.google.common.collect.ImmutableList;
 
 @Controller
-@SessionAttributes("category")
-public class CategoryController extends AbstractController {
-    
-    private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
-    
-    protected static final String ERROR_MESSAGE_KEY_DELETED_CATEGORY_WAS_NOT_FOUND = "error.message.deleted.not.found";
-    protected static final String ERROR_MESSAGE_KEY_EDITED_CATEGORY_WAS_NOT_FOUND = "error.message.edited.not.found";
-    
-    protected static final String FEEDBACK_MESSAGE_KEY_CATEGORY_CREATED = "feedback.message.category.created";
-    protected static final String FEEDBACK_MESSAGE_KEY_CATEGORY_DELETED = "feedback.message.category.deleted";
-    protected static final String FEEDBACK_MESSAGE_KEY_CATEGORY_EDITED = "feedback.message.category.edited";
-    
-    protected static final String MODEL_ATTIRUTE_CATEGORY = "category";
-    protected static final String MODEL_ATTRIBUTE_CATEGORIES = "categories";
-    protected static final String MODEL_ATTRIBUTE_SEARCH_CRITERIA = "searchCriteria";
-    
-    protected static final String CATEGORY_ADD_FORM_VIEW = "category/create";
-    protected static final String CATEGORY_EDIT_FORM_VIEW = "category/edit";
-    protected static final String CATEGORY_LIST_VIEW = "category/list";
-    protected static final String CATEGORY_SEARCH_RESULT_VIEW = "category/searchResults";
-    
-    protected static final String REQUEST_MAPPING_LIST = "/";
-    
+@RequestMapping("/home/category")
+public class CategoryController {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(CategoryController.class);
+
     @Resource
     private CategoryService service;
 
-    /**
-     * Processes delete category requests.
-     * @param id    The id of the deleted category.
-     * @param attributes
-     * @return
-     */
-    @RequestMapping(value = "/category/delete/{id}", method = RequestMethod.GET)
-    public String delete(@PathVariable("id") Long id, RedirectAttributes attributes) throws EntityNotFoundException {
-        LOGGER.debug("Deleting category with id: " + id);
+    // @Resource
+    // private Validator validator;
 
-        try {
-            Category deleted = service.delete(id);
-            addFeedbackMessage(attributes, FEEDBACK_MESSAGE_KEY_CATEGORY_DELETED, deleted.getCategoryName());
-        } catch(EntityNotFoundException e) {
-            LOGGER.error("EntityNotFoundException: ", e);
-            addErrorMessage(attributes, ERROR_MESSAGE_KEY_DELETED_CATEGORY_WAS_NOT_FOUND);
+    @RequestMapping
+    public String getCategoryPage() {
+        return "home/category";
+    }
+
+    @RequestMapping(value = "/list", produces = "application/json")
+    @ResponseBody
+    public JqgridReply<CategoryDTO> list(
+            @RequestParam("_search") Boolean search,
+            @RequestParam(value = "filters", required = false) String filters,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "rows", required = false) Integer rows,
+            @RequestParam(value = "sidx", required = false) String sidx,
+            @RequestParam(value = "sord", required = false) String sord) {
+
+        Pageable pageRequest = new PageRequest(page - 1, rows);
+
+        if (search == true) {
+            return getFilteredRecords(filters, pageRequest);
         }
 
-        return createRedirectViewPath(REQUEST_MAPPING_LIST);
+        Page<Category> categories = service.findAll(pageRequest);
+        List<CategoryDTO> catDTOs = Mapper.mapToCategoryDTOs(categories);
+
+        return new JqgridReply<>(
+                Integer.valueOf(categories.getNumber() + 1).toString(),
+                Integer.valueOf(categories.getTotalPages()).toString(),
+                Long.valueOf(categories.getTotalElements()).toString(),
+                catDTOs);
     }
 
-    /**
-     * Processes search category requests.
-     * @param searchCriteria    The search criteria.
-     * @param model
-     * @return
-     */
-    @RequestMapping(value = "/category/search", method = RequestMethod.POST)
-    public String search(@ModelAttribute(MODEL_ATTRIBUTE_SEARCH_CRITERIA)SearchDTO searchCriteria, Model model) {
-        LOGGER.debug("Searching categorys with search criteria: " + searchCriteria);
-        
-        String searchTerm = searchCriteria.getSearchTerm();
-        
-        return CATEGORY_SEARCH_RESULT_VIEW;
-    }    
-    
-    /**
-     * Processes create category requests.
-     * @param model
-     * @return  The name of the create category form view.
-     */
-    @RequestMapping(value = "/category/create", method = RequestMethod.GET) 
-    public String showCreateCategoryForm(Model model) {
-        LOGGER.debug("Rendering create category form");
-        
-        model.addAttribute(MODEL_ATTIRUTE_CATEGORY, new CategoryDTO());
+    public JqgridReply<CategoryDTO> getFilteredRecords(String filters, Pageable pageRequest) {
+        String qCategoryName = null;
+        String qDescription = null;
 
-        return CATEGORY_ADD_FORM_VIEW;
-    }    
-
-    /**
-     * Processes the submissions of create category form.
-     * @param created   The information of the created categories.
-     * @param bindingResult
-     * @param attributes
-     * @return
-     */
-    @RequestMapping(value = "/category/create", method = RequestMethod.POST)
-    public String submitCreateCategoryForm(@Valid @ModelAttribute(MODEL_ATTIRUTE_CATEGORY) CategoryDTO created, BindingResult bindingResult, RedirectAttributes attributes) {
-        LOGGER.debug("Create category form was submitted with information: " + created);
-
-        if (bindingResult.hasErrors()) {
-            return CATEGORY_ADD_FORM_VIEW;
-        }
-                
-        Category cat = service.create(created);
-
-        addFeedbackMessage(attributes, FEEDBACK_MESSAGE_KEY_CATEGORY_CREATED, cat.getCategoryName());
-
-        return createRedirectViewPath(REQUEST_MAPPING_LIST);
-    }
-
-    /**
-     * Processes edit category requests.
-     * @param id    The id of the edited category.
-     * @param model
-     * @param attributes
-     * @return  The name of the edit category form view.
-     */
-    @RequestMapping(value = "/category/edit/{id}", method = RequestMethod.GET)
-    public String showEditCategoryForm(@PathVariable("id") Long id, Model model, RedirectAttributes attributes) {
-        LOGGER.debug("Rendering edit category form for category with id: " + id);
-        
-        Category cat = service.findById(id);
-        if (cat == null) {
-            LOGGER.debug("No category found with id: " + id);
-            addErrorMessage(attributes, ERROR_MESSAGE_KEY_EDITED_CATEGORY_WAS_NOT_FOUND);
-            return createRedirectViewPath(REQUEST_MAPPING_LIST);            
+        JqgridFilter filter = Mapper.map(filters);
+        for (JqgridFilter.Rule rule : filter.getRules()) {
+            if (rule.getField().equals("name")) {
+                qCategoryName = rule.getData();
+            } else if (rule.getField().equals("description")) {
+                qDescription = rule.getData();
+            }
         }
 
-        model.addAttribute(MODEL_ATTIRUTE_CATEGORY, constructFormObject(cat));
-        
-        return CATEGORY_EDIT_FORM_VIEW;
-    }
+        Page<Category> categories = null;
 
-    /**
-     * Processes the submissions of edit category form.
-     * @param updated   The information of the edited category.
-     * @param bindingResult
-     * @param attributes
-     * @return
-     */
-    @RequestMapping(value = "/category/edit", method = RequestMethod.POST)
-    public String submitEditCategoryForm(@Valid @ModelAttribute(MODEL_ATTIRUTE_CATEGORY) CategoryDTO updated, BindingResult bindingResult, RedirectAttributes attributes) {
-        LOGGER.debug("Edit category form was submitted with information: " + updated);
-        
-        if (bindingResult.hasErrors()) {
-            LOGGER.debug("Edit category form contains validation errors. Rendering form view.");
-            return CATEGORY_EDIT_FORM_VIEW;
+        if (qCategoryName != null && qDescription != null) {
+            categories = service.findByNameLikeAndDescriptionLike(qCategoryName, qDescription, pageRequest);
+        } else if (qCategoryName != null) {
+            categories = service.findByNameLike(qCategoryName, pageRequest);
+        } else if (qDescription != null) {
+            categories = service.findByDescriptionLike(qDescription, pageRequest);
         }
-        
-        try {
-            Category cat = service.update(updated);
-            addFeedbackMessage(attributes, FEEDBACK_MESSAGE_KEY_CATEGORY_EDITED, cat.getCategoryName());
-        } catch (EntityNotFoundException e) {
-            LOGGER.error("EntityNotFoundException: ", e);
-            addErrorMessage(attributes, ERROR_MESSAGE_KEY_EDITED_CATEGORY_WAS_NOT_FOUND);
+
+        List<CategoryDTO> catDTOs = Mapper.mapToCategoryDTOs(categories);
+
+        return new JqgridReply<>(
+                Integer.valueOf(categories.getNumber() + 1).toString(),
+                Integer.valueOf(categories.getTotalPages()).toString(),
+                Long.valueOf(categories.getTotalElements()).toString(),
+                catDTOs);
+    }
+
+    @RequestMapping(value = "/get", produces = "application/json")
+    @ResponseBody
+    public CategoryDTO get(@RequestBody CategoryDTO cat) {
+        List<Category> categories = service.findByName(cat.getName());
+        return categories == null ? null : Mapper.map(categories.get(0));
+    }
+
+    // @RequestMapping(value = "/create", produces = "application/json", method
+    // = RequestMethod.POST)
+    // public @ResponseBody
+    // StatusReply create(@RequestParam String name, @RequestParam String
+    // description) {
+    //
+    // Category cat = new Category.Builder()
+    // .setDescription(description)
+    // .build(name);
+    //
+    // return new StatusReply(service.create(cat) != null);
+    // }
+
+    // adding consumes in RequestMapping didn't work... 2013/12/19
+    @RequestMapping(value = "/create", produces = "application/json", consumes = "application/json", method = RequestMethod.POST)
+    public @ResponseBody
+    StatusReply create(@Valid @RequestBody CategoryDTO dto, BindingResult result) {
+
+        StatusReply reply;
+
+        if (result.hasErrors()) {
+
+            LOGGER.error("Add category form contains errors:");
+            ImmutableList.Builder<String> builder = new ImmutableList.Builder<>();
+            for (ObjectError error : result.getAllErrors()) {
+                builder.add(error.getDefaultMessage());
+                LOGGER.error(error.toString());
+            }
+            ImmutableList<String> errors = builder.build();
+
+            reply = new StatusReply(false, errors);
+        } else {
+
+            Category cat = new Category.Builder(dto.getName())
+                    .setDescription(dto.getDescription())
+                    .build();
+
+            reply = new StatusReply(service.create(cat) != null);
         }
-        
-        return createRedirectViewPath(REQUEST_MAPPING_LIST);
-    }
-    
-    private CategoryDTO constructFormObject(Category cat) {
-        CategoryDTO formObject = new CategoryDTO();
-        
-        formObject.setCategoryId(cat.getCategoryId());
-        formObject.setCategoryName(cat.getCategoryName());
-        formObject.setDescription(cat.getDescription());
-        formObject.setPicture(cat.getPicture());
-        
-        return formObject;
+
+        return reply;
     }
 
-    /**
-     * Processes requests to home page which lists all available categories.
-     * @param model
-     * @return  The name of the category list view.
-     */
-    @RequestMapping(value = REQUEST_MAPPING_LIST, method = RequestMethod.GET)
-    public String showList(Model model) {
-        LOGGER.debug("Rendering category list page");
+    @RequestMapping(value = "/update", produces = "application/json", method = RequestMethod.POST)
+    public @ResponseBody
+    StatusReply update(@RequestParam Long id, @RequestParam String name, @RequestParam String description) {
 
-        List<Category> cats = service.findAll();
-        model.addAttribute(MODEL_ATTRIBUTE_CATEGORIES, cats);
-        model.addAttribute(MODEL_ATTRIBUTE_SEARCH_CRITERIA, new CategoryDTO());
-
-        return CATEGORY_LIST_VIEW;
+        return new StatusReply(service.update(id, name, description) != null);
     }
 
-    /**
-     * This setter method should only be used by unit tests
-     * @param categoryService
-     */
-    protected void setCategoryService(CategoryService service) {
-        this.service = service;
+    @RequestMapping(value = "/delete", produces = "application/json", method = RequestMethod.POST)
+    public @ResponseBody
+    StatusReply delete(@RequestParam Long id) {
+
+        return new StatusReply(service.delete(id) != null);
     }
 }

@@ -26,8 +26,56 @@ public final class Category implements DomainObject, Comparable<Category> {
     public static final int MAX_LENGTH_DESCRIPTION = 255;
 
     public static class Builder {
+
+        // This reference will save a Category object that gets passed in the constructor for updating. When build is
+        // called, it will check to see if the built object is the same as this one. If it is, it will return this one
+        // to avoid publishing a duplicate object.
+        private final Category category;
+
+        // Required
+        private final String categoryName;
+        private final Long categoryId;
+
+        // Optional
         private String description;
         private byte[] picture;
+
+        public Builder(String categoryName) {
+            this.categoryName = categoryName;
+            categoryId = null;
+            category = null;
+        }
+
+        /**
+         * This constructor is intended to build an update an entity that has already been saved in the database, but it
+         * can also be used to build an update of an entity that has not been saved. This buildUpdate method should be
+         * called if you want to update multiple elements excluding the categoryName. existing must not be null.
+         * 
+         * @param existing
+         *            The Category object to update. Any updates should be set by calling the appropriate set method.
+         */
+        public Builder(Category category) {
+            this(category, category.categoryName);
+        }
+
+        /**
+         * This constructor is intended to build an update an entity that has already been saved in the database, but it
+         * can also be used to build an update of an entity that has not been saved. This buildUpdate method should be
+         * called if you want to update multiple elements including the categoryName. Update and categoryName must not
+         * be null.
+         * 
+         * @param existing
+         *            The Category object to update. Any updates should be set by calling the appropriate set method.
+         * @param categoryName
+         */
+        public Builder(Category category, String categoryName) {
+            Preconditions.checkNotNull(category, "category must not be null");
+            this.categoryName = categoryName;
+            categoryId = category.categoryId;
+            setDescription(category.description);
+            setPicture(category.picture);
+            this.category = category;
+        }
 
         public Builder setDescription(String desc) {
             description = desc;
@@ -35,44 +83,26 @@ public final class Category implements DomainObject, Comparable<Category> {
         }
 
         public Builder setPicture(byte[] picture) {
-            this.picture = picture;
+            // Make a defensive copy here.
+            this.picture = picture == null ? picture : Arrays.copyOf(picture, picture.length);
             return this;
         }
 
-        public Category build(String categoryName) {
-            return new Category(categoryName, description, picture);
+        // This is called in the build class before building to ensure that a valid object gets built.
+        private void validate() {
+            Preconditions.checkNotNull(categoryName, "categoryName must not be null");
+            Preconditions.checkArgument(categoryName.length() <= MAX_LENGTH_CATEGORY_NAME,
+                    "categoryName must be less than or equal to " + MAX_LENGTH_CATEGORY_NAME + " characters.");
+            if (description != null) {
+                Preconditions.checkArgument(description.length() <= MAX_LENGTH_DESCRIPTION,
+                        "description must be less than or equal to " + MAX_LENGTH_DESCRIPTION + " characters.");
+            }
         }
 
-        /**
-         * This method is intended to build an update an entity that has already
-         * been saved in the database, but it can also be used to build an
-         * update of an entity that has not been saved. This buildUpdate method
-         * should be called if you want to update multiple elements excluding
-         * the categoryName. Update must not be null.
-         * 
-         * @param update
-         * @return a new Category object
-         */
-        public Category buildUpdate(Category update) {
-            return buildUpdate(update, update.categoryName);
-        }
-
-        /**
-         * This method is intended to build an update an entity that has already
-         * been saved in the database, but it can also be used to build an
-         * update of an entity that has not been saved. This buildUpdate method
-         * should be called if you want to update multiple elements including
-         * the categoryName. Update and categoryName must not be null.
-         * 
-         * @param update
-         * @param categoryName
-         * @return a new Category object
-         */
-        public Category buildUpdate(Category update, String categoryName) {
-            Preconditions.checkNotNull(update, "update must not be null");
-            return new Category(update.categoryId, categoryName,
-                    (description == null ? update.description : description),
-                    (picture == null ? update.picture : picture));
+        public Category build() {
+            validate();
+            Category built = new Category(this);
+            return built.equals(category) ? category : built;
         }
     }
 
@@ -100,31 +130,16 @@ public final class Category implements DomainObject, Comparable<Category> {
     private volatile int hashCode;
 
     private Category() {
-        this("", null, null);
+        this(new Builder(""));
     }
 
-    private Category(String categoryName, String description, byte[] picture) {
-        this(null, categoryName, description, picture);
-    }
+    private Category(Builder builder) {
+        Preconditions.checkNotNull(builder, "builder cannot be null");
 
-    /**
-     * This constructor can be used to facilitate updating an existing entity in
-     * the database.
-     * 
-     * @param categoryId
-     * @param categoryName
-     * @param description
-     * @param picture
-     */
-    private Category(Long categoryId, String categoryName, String description,
-            byte[] picture) {
-        Preconditions.checkNotNull(categoryName,
-                "categoryName must not be null");
-        this.categoryId = categoryId;
-        this.categoryName = categoryName;
-        this.description = description;
-        this.picture = picture == null ? picture : Arrays.copyOf(picture,
-                picture.length);
+        this.categoryId = builder.categoryId;
+        this.categoryName = builder.categoryName;
+        this.description = builder.description;
+        this.picture = builder.picture;
     }
 
     public Long getCategoryId() {
@@ -145,43 +160,42 @@ public final class Category implements DomainObject, Comparable<Category> {
     }
 
     /**
-     * This method can be used to create a new object from one that is already
-     * saved in the database if you want to update it with a new category name.
+     * This method can be used to create a new object from one that is already saved in the database if you want to
+     * update it with a new category name.
      * 
      * @param categoryName
      * @return new Category object
      */
     public Category setCategoryName(String categoryName) {
-        return new Category(categoryId, categoryName, description, picture);
+        return new Category(new Builder(this, categoryName));
     }
 
     /**
-     * This method can be used to create a new object from one that is already
-     * saved in the database if you want to update it with a new description.
+     * This method can be used to create a new object from one that is already saved in the database if you want to
+     * update it with a new description.
      * 
      * @param description
      * @return new Category object
      */
     public Category setDescription(String description) {
-        return new Category(categoryId, categoryName, description, picture);
+        return new Category(new Builder(this).setDescription(description));
     }
 
     /**
-     * This method can be used to create a new object from one that is already
-     * saved in the database if you want to update it with a new picture.
+     * This method can be used to create a new object from one that is already saved in the database if you want to
+     * update it with a new picture.
      * 
      * @param picture
      * @return new Category object
      */
     public Category setPicture(byte[] picture) {
-        return new Category(categoryId, categoryName, description, picture);
+        return new Category(new Builder(this).setPicture(picture));
     }
 
     /**
-     * This method can be used to update a Category that exists in the database
-     * if multiple values need to be changed. The Builder object has the values
-     * that should be changed. The categoryName must be passed separately
-     * because the Builder does not contain that.
+     * This method can be used to update a Category that exists in the database if multiple values need to be changed.
+     * The Builder object has the values that should be changed. The categoryName must be passed separately because the
+     * Builder does not contain that.
      * 
      * @param builder
      * @param categoryName
@@ -199,21 +213,23 @@ public final class Category implements DomainObject, Comparable<Category> {
         return com.google.common.base.Objects.toStringHelper(this)
                 .add("categoryId", categoryId)
                 .add("categoryName", categoryName)
-                .add("description", description).add("picture", picture)
+                .add("description", description)
+                .add("picture", picture)
                 .toString();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == this)
+        if (o == this) {
             return true;
-        if (!(o instanceof Category))
+        }
+        if (!(o instanceof Category)) {
             return false;
+        }
         Category c = (Category) o;
 
         return categoryName.equalsIgnoreCase(c.categoryName)
-                && (description == null ? c.description == null : description
-                        .equalsIgnoreCase(c.description))
+                && (description == null ? c.description == null : description.equalsIgnoreCase(c.description))
                 && Arrays.equals(picture, c.picture);
     }
 
@@ -225,10 +241,9 @@ public final class Category implements DomainObject, Comparable<Category> {
             // Strings to upper case
             // here so that the hash code will be the same if Strings are equal
             // ignoring case.
-            result = Objects.hash(
-                    categoryName.toUpperCase(),
-                    (description == null ? description : description
-                            .toUpperCase()), picture);
+            result = Objects.hash(categoryName.toUpperCase(),
+                    (description == null ? description : description.toUpperCase()),
+                    picture);
             hashCode = result;
         }
         return result;
@@ -237,26 +252,25 @@ public final class Category implements DomainObject, Comparable<Category> {
     @Override
     public int compareTo(Category o) {
         // Null is considered less than other values.
-        if (o == null)
+        if (o == null) {
             return 1;
+        }
         int diff = ComparisonChain
                 .start()
-                .compare(categoryName, o.categoryName,
-                        Ordering.from(String.CASE_INSENSITIVE_ORDER))
-                .compare(
-                        description,
-                        o.description,
-                        Ordering.from(String.CASE_INSENSITIVE_ORDER)
-                                .nullsFirst()).result();
-        if (diff != 0)
+                .compare(categoryName, o.categoryName, Ordering.from(String.CASE_INSENSITIVE_ORDER))
+                .compare(description, o.description, Ordering.from(String.CASE_INSENSITIVE_ORDER).nullsFirst())
+                .result();
+        if (diff != 0) {
             return diff;
+        }
 
-        if (picture == null)
+        if (picture == null) {
             return o.picture == null ? 0 : -1;
-        if (o.picture == null)
+        }
+        if (o.picture == null) {
             return 1;
-        return UnsignedBytes.lexicographicalComparator().compare(picture,
-                o.getPicture());
+        }
+        return UnsignedBytes.lexicographicalComparator().compare(picture, o.getPicture());
     }
 
 }

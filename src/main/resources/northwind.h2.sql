@@ -16,7 +16,7 @@ CREATE TABLE order_details (
 DROP TABLE IF EXISTS products;
 
 CREATE TABLE products (
-    product_id SMALLINT NOT NULL,
+    product_id SMALLINT NOT NULL AUTO_INCREMENT,
     product_name VARCHAR(40) NOT NULL,
     supplier_id SMALLINT,
     category_id SMALLINT,
@@ -26,12 +26,12 @@ CREATE TABLE products (
     units_on_order SMALLINT,
     reorder_level SMALLINT,
     discontinued INT NOT NULL
-);
+) AUTO_INCREMENT=78;
 
 DROP TABLE IF EXISTS suppliers;
 
 CREATE TABLE suppliers (
-    supplier_id SMALLINT NOT NULL,
+    supplier_id SMALLINT NOT NULL AUTO_INCREMENT,
     company_name VARCHAR(40) NOT NULL,
     contact_name VARCHAR(30),
     contact_title VARCHAR(30),
@@ -43,16 +43,16 @@ CREATE TABLE suppliers (
     phone VARCHAR(24),
     fax VARCHAR(24),
     home_page VARCHAR(500)
-);
+) AUTO_INCREMENT=30;
 
 DROP TABLE IF EXISTS categories;
 
 CREATE TABLE categories (
-    category_id SMALLINT NOT NULL,
+    category_id SMALLINT NOT NULL AUTO_INCREMENT,
     category_name VARCHAR(15) NOT NULL,
     description VARCHAR(255),
     picture BINARY
-);
+) AUTO_INCREMENT=8;
 
 DROP TABLE IF EXISTS employeeterritories;
 
@@ -99,7 +99,7 @@ CREATE TABLE customers (
 DROP TABLE IF EXISTS employees;
     
 CREATE TABLE employees (
-    employee_id SMALLINT NOT NULL,
+    employee_id SMALLINT NOT NULL AUTO_INCREMENT,
     last_name VARCHAR(20) NOT NULL,
     first_name VARCHAR(10) NOT NULL,
     title VARCHAR(30),
@@ -117,7 +117,7 @@ CREATE TABLE employees (
     notes VARCHAR(1024),
     reports_to SMALLINT,
     photo_path VARCHAR(255)
-);
+) AUTO_INCREMENT=10;
 
 DROP TABLE IF EXISTS territories;
 
@@ -130,26 +130,26 @@ CREATE TABLE territories (
 DROP TABLE IF EXISTS region;
  
 CREATE TABLE region (
-    region_id SMALLINT NOT NULL,
+    region_id SMALLINT NOT NULL AUTO_INCREMENT,
     region_description VARCHAR(40) NOT NULL
-);
+) AUTO_INCREMENT=5;
 
 DROP TABLE IF EXISTS shippers;
 
 CREATE TABLE shippers (
-    shipper_id SMALLINT NOT NULL,
+    shipper_id SMALLINT NOT NULL AUTO_INCREMENT,
     company_name VARCHAR(40) NOT NULL,
     phone VARCHAR(24)
-);
+) AUTO_INCREMENT=7;
 
 DROP TABLE IF EXISTS usstates;
 
 CREATE TABLE usstates (
-    state_id SMALLINT NOT NULL,
+    state_id SMALLINT NOT NULL AUTO_INCREMENT,
     state_name VARCHAR(100),
     state_abbr VARCHAR(2),
     state_region VARCHAR(50)
-);
+) AUTO_INCREMENT=52;
 
 --
 -- Populate tables.
