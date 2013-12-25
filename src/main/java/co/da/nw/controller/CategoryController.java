@@ -145,11 +145,7 @@ public class CategoryController {
             reply = new StatusReply(false, errors);
         } else {
 
-            Category cat = new Category.Builder(dto.getName())
-                    .setDescription(dto.getDescription())
-                    .build();
-
-            reply = new StatusReply(service.create(cat) != null);
+            reply = new StatusReply(service.create(dto) != null);
         }
 
         return reply;
@@ -157,9 +153,27 @@ public class CategoryController {
 
     @RequestMapping(value = "/update", produces = "application/json", method = RequestMethod.POST)
     public @ResponseBody
-    StatusReply update(@RequestParam Long id, @RequestParam String name, @RequestParam String description) {
+    StatusReply update(@Valid @RequestBody CategoryDTO dto, BindingResult result) {
 
-        return new StatusReply(service.update(id, name, description) != null);
+        StatusReply reply;
+
+        if (result.hasErrors()) {
+
+            LOGGER.error("Add category form contains errors:");
+            ImmutableList.Builder<String> builder = new ImmutableList.Builder<>();
+            for (ObjectError error : result.getAllErrors()) {
+                builder.add(error.getDefaultMessage());
+                LOGGER.error(error.toString());
+            }
+            ImmutableList<String> errors = builder.build();
+
+            reply = new StatusReply(false, errors);
+        } else {
+
+            reply = new StatusReply(service.update(dto) != null);
+        }
+
+        return reply;
     }
 
     @RequestMapping(value = "/delete", produces = "application/json", method = RequestMethod.POST)

@@ -17,7 +17,7 @@ $(document).ready(function() {
                 {name:'id',index:'id', width:55, editable:false, editoptions:{readonly:true, size:10}, hidden:true},
                 //{name:'categoryId',index:'categoryId', width:55, editable:false, editoptions:{readonly:true, size:10}},
                 {name:'name',index:'name', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}},
-                {name:'description',index:'description', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}}
+                {name:'description',index:'description', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}}
             ],
             postData: {},
             rowNum:10,
@@ -92,29 +92,25 @@ $(document).ready(function() {
     });
 });
 
-$.postJSON = function(url, data, callback) {
-    return jQuery.ajax({
-        /*headers: { 
-            Accept: 'application/json',
-            Content-Type: 'application/json' 
-        },*/        
-        type: 'POST',
-        url: url,
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        mimeType: 'application/json',
-        dataType: 'json',
-        success: callback,
-        error:function(data,status,er) {
-            alert("error: "+data+" status: "+status+" er:"+er);
-        }        
-    });
-};
-
-function newCategory(data) {
-  $.postJSON(urls.createUrl, data, function(data) {
-    console.debug("Inserted: " + data);
-  });
+// This function takes a data object and converts it to JSON. The data object should have
+// an oper key/value. Remove that before converting to JSON and afterward, put it back.
+// If oper is undefined, just convert to JSON. add is a boolean. If it is true, set the
+// id to 0.
+function convertToJSON(data, add) {
+    if(add) {
+        data.id = 0;
+    }
+    var operVal = data.oper;
+    var jdata;
+    if(operVal != undefined) {
+        delete data['oper'];
+        jdata = JSON.stringify(data);
+        data.oper = operVal;
+    } else {
+        jdata = JSON.stringify(data);
+    }
+    
+    return jdata;
 }
 
 function addRow() {
@@ -138,16 +134,7 @@ function addRow() {
                     }
                 },
                 serializeEditData: function(data){
-                    // First, save the oper value and then delete it.
-                    // We don't need it in the json value that goes to the server.
-                    var operVal = data.oper;
-                    delete data['oper'];
-                    data.id = 0;
-                    var jdata = JSON.stringify(data);
-                    // Now, add oper back.
-                    data.oper = operVal;
-                    //return $.post(urls.createUrl, jdata, null, 'json');
-                    return jdata;
+                    return convertToJSON(data, true);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {
@@ -197,6 +184,20 @@ function editRow() {
         $('#grid').jqGrid('editGridRow', row,
             {   url: urls.updateUrl, 
                 editData: {},
+                ajaxEditOptions: {
+                    dataType: 'json',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    mimeType: 'application/json',
+                    headers: { 
+                        accept: 'application/json',
+                        contentType: 'application/json' 
+                    }
+                },
+                serializeEditData: function(data){
+                    // Send it as JSON.
+                    return convertToJSON(data, false);
+                },
                 recreateForm: true,
                 beforeShowForm: function(form) {
                     $('#pData').hide();  

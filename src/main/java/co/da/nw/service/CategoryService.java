@@ -6,10 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import co.da.nw.domain.Category;
+import co.da.nw.dto.CategoryDTO;
 
 public interface CategoryService {
 
-    Category create(Category cat);
+    Category create(CategoryDTO dto);
 
     Category delete(Long id);
 
@@ -21,7 +22,7 @@ public interface CategoryService {
 
     List<Category> findByName(String name);
 
-    Category update(Long id, String categoryName, String description);
+    Category update(CategoryDTO dto);
 
     Page<Category> findByNameLike(String name, Pageable pageable);
 

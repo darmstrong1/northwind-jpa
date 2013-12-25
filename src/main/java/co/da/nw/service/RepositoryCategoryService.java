@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import co.da.nw.dao.CategoryRepository;
 import co.da.nw.domain.Category;
+import co.da.nw.dto.CategoryDTO;
 
 @Service
 public class RepositoryCategoryService implements CategoryService {
@@ -26,12 +27,11 @@ public class RepositoryCategoryService implements CategoryService {
 
     @Transactional
     @Override
-    public Category create(Category cat) {
-        LOGGER.debug("Creating a new category with information: " + cat);
+    public Category create(CategoryDTO dto) {
+        LOGGER.debug("Creating a new category with information: " + dto);
 
-        Category created = new Category.Builder(cat.getCategoryName())
-                .setDescription(cat.getDescription())
-                .setPicture(cat.getPicture())
+        Category created = new Category.Builder(dto.getName())
+                .setDescription(dto.getDescription())
                 .build();
         return repository.save(created);
     }
@@ -117,19 +117,19 @@ public class RepositoryCategoryService implements CategoryService {
 
     @Transactional(rollbackFor = EntityNotFoundException.class)
     @Override
-    public Category update(Long id, String categoryName, String description) {
-        // LOGGER.debug("Updating category with information: " + update);
+    public Category update(CategoryDTO dto) {
+        LOGGER.debug("Updating category with information: " + dto);
 
-        Category existing = repository.findOne(id);
+        Category existing = repository.findOne(dto.getId());
 
         if (existing == null) {
-            LOGGER.debug("No category found with id: " + id);
+            LOGGER.debug("No category found with id: " + dto.getId());
             throw new EntityNotFoundException(Category.class.getSimpleName() + " not found with id of "
-                    + id);
+                    + dto.getId());
         }
 
-        Category.Builder builder = new Category.Builder(existing, categoryName);
-        builder.setDescription(description);
+        Category.Builder builder = new Category.Builder(existing, dto.getName());
+        builder.setDescription(dto.getDescription());
 
         return repository.save(builder.build());
     }

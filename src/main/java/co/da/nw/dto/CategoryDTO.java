@@ -23,11 +23,11 @@ public class CategoryDTO implements Serializable {
     private Long id;
 
     @NotNull
-    @Size(max = Category.MAX_LENGTH_CATEGORY_NAME)
+    @Size(min = 2, max = Category.MAX_LENGTH_CATEGORY_NAME, message = "Name must be between {min} and {max} characters.")
     @JsonProperty
     private String name;
 
-    @Size(max = Category.MAX_LENGTH_DESCRIPTION)
+    @Size(max = Category.MAX_LENGTH_DESCRIPTION, message = "Description must be less than {max} characters.")
     @JsonProperty
     private String description;
 
