@@ -1,6 +1,10 @@
 package co.da.nw.controller;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +20,11 @@ import org.springframework.web.context.WebApplicationContext;
 
 import co.da.nw.config.TestContext;
 import co.da.nw.config.WebAppContext;
+import co.da.nw.domain.Category;
+import co.da.nw.dto.CategoryDTO;
+import co.da.nw.dto.reply.JqgridReply;
 import co.da.nw.service.CategoryService;
+import co.da.nw.util.Mapper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestContext.class, WebAppContext.class })
@@ -31,6 +39,9 @@ public class WebAppContextCategoryControllerTest {
     @Autowired
     private WebApplicationContext webAppContext;
 
+    @Autowired
+    private CategoryController controller;
+
     @Before
     public void setUp() {
         // We have to reset our mock between tests because the mock objects
@@ -39,6 +50,15 @@ public class WebAppContextCategoryControllerTest {
         Mockito.reset(serviceMock);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webAppContext).build();
+    }
+
+    @Test
+    public void testList() {
+        JqgridReply<CategoryDTO> reply = controller.list(false, null, 1, 10, "id", "asc");
+        List<CategoryDTO> rows = reply.getRows();
+        List<Category> categories = serviceMock.findAll();
+        List<CategoryDTO> catDTOs = Mapper.mapToCategoryDTOs(categories);
+        assertThat(rows, is(catDTOs));
     }
 
     @Test

@@ -151,8 +151,8 @@ public final class Customer implements DomainObject, Comparable<Customer> {
 
         private void validate() {
             Preconditions.checkNotNull(customerId, "customerId cannot be null");
-            Preconditions.checkArgument(customerId.length() <= MAX_LENGTH_CUSTOMER_ID,
-                    "customerId must be less than or equal to %s characters", MAX_LENGTH_CUSTOMER_ID);
+            Preconditions.checkArgument(customerId.length() == MAX_LENGTH_CUSTOMER_ID,
+                    "customerId must be equal to %s characters", MAX_LENGTH_CUSTOMER_ID);
 
             Preconditions.checkNotNull(companyNm, "companyNm cannot be null");
             Preconditions.checkArgument(companyNm.length() <= MAX_LENGTH_COMPANY_NM,

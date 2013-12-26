@@ -23,11 +23,13 @@ public class CategoryDTO implements Serializable {
     private Long id;
 
     @NotNull
-    @Size(min = 2, max = Category.MAX_LENGTH_CATEGORY_NAME, message = "Name must be between {min} and {max} characters.")
+    @Size(min = 2, max = Category.MAX_LENGTH_CATEGORY_NAME,
+            message = "Name must be between {min} and {max} characters.")
     @JsonProperty
     private String name;
 
-    @Size(max = Category.MAX_LENGTH_DESCRIPTION, message = "Description must be less than {max} characters.")
+    @Size(max = Category.MAX_LENGTH_DESCRIPTION,
+            message = "Description must be less than or equal to {max} characters.")
     @JsonProperty
     private String description;
 
@@ -73,5 +75,23 @@ public class CategoryDTO implements Serializable {
                 .add("name", name)
                 .add("description", description)
                 .toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(super.hashCode(), id, name, description);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof CategoryDTO) {
+            if (!super.equals(object))
+                return false;
+            CategoryDTO that = (CategoryDTO) object;
+            return Objects.equal(this.id, that.id)
+                    && Objects.equal(this.name, that.name)
+                    && Objects.equal(this.description, that.description);
+        }
+        return false;
     }
 }
