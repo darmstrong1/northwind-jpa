@@ -5,7 +5,6 @@ var urls = {
         'deleteUrl' : '/home/category/delete'
 };
 
-
 $(document).ready(function() {
     $(function() {
         $("#grid").jqGrid({
@@ -22,7 +21,7 @@ $(document).ready(function() {
             postData: {},
             rowNum:10,
             rowList:[10,20,40,60],
-            height: 240,
+            height: '100%',
             autowidth: true,
             rownumbers: true,
             pager: '#pager',
@@ -91,6 +90,10 @@ $(document).ready(function() {
         //$("#grid").jqGrid('setGridHeight', $("#jqgrid").height() – ($("#gbox_grid").height() – $('#gbox_grid .ui-jqgrid-bdiv').height()));
     });
 });
+
+$(window).resize(function() {
+    $("#grid").jqGrid('setGridWidth', $("#jqgrid").width()-5, true);
+}).trigger('resize');
 
 // This function takes a data object and converts it to JSON. The data object should have
 // an oper key/value. Remove that before converting to JSON and afterward, put it back.
