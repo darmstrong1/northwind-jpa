@@ -1,22 +1,34 @@
-var categoryUrls = {
-        'listUrl' : '/home/category/list',
-        'createUrl' : '/home/category/create',
-        'updateUrl' : '/home/category/update',
-        'deleteUrl' : '/home/category/delete'
+var customerUrls = {
+        'listUrl' : '/home/customer/list',
+        'createUrl' : '/home/customer/create',
+        'updateUrl' : '/home/customer/update',
+        'deleteUrl' : '/home/customer/delete'
 };
+
+$(window).resize(function() {
+    $("#customerGrid").jqGrid('setGridWidth', $("#customerJqgrid").width()-5, true);
+}).trigger('resize');
 
 $(document).ready(function() {
     $(function() {
-        $("#categoryGrid").jqGrid({
-            url: categoryUrls.listUrl,
+        $("#customerGrid").jqGrid({
+            url: customerUrls.listUrl,
             datatype: 'json',
             mtype: 'GET',
-            colNames:['Id', 'Name', 'Description'],
+            colNames:['Id', 'Company Name', 'Contact Name', 'Contact Title', 'Address', 'City', 'Region',
+                      'Postal Code', 'Country', 'Phone', 'Fax'],
             colModel:[
-                {name:'id',index:'id', width:55, editable:false, editoptions:{readonly:true, size:10}, hidden:true},
-                //{name:'categoryId',index:'categoryId', width:55, editable:false, editoptions:{readonly:true, size:10}},
-                {name:'name',index:'name', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}},
-                {name:'description',index:'description', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}}
+                {name:'customerId',index:'customerId', width:55, editable:true, editrules:{required:true},editoptions:{size:10}},
+                {name:'companyNm',index:'companyNm', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}},
+                {name:'contactNm',index:'contactNm', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+                {name:'contactTitle',index:'contactTitle', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+                {name:'address',index:'address', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+                {name:'city',index:'city', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+                {name:'region',index:'region', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+                {name:'postalCode',index:'postalCode', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+                {name:'country',index:'country', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+                {name:'phone',index:'phone', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+                {name:'fax',index:'fax', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}}
             ],
             postData: {},
             rowNum:10,
@@ -24,11 +36,11 @@ $(document).ready(function() {
             height: '100%',
             autowidth: true,
             rownumbers: true,
-            pager: '#categoryPager',
-            sortname: 'id',
+            pager: '#customerPager',
+            sortname: 'customerId',
             viewrecords: true,
             sortorder: "asc",
-            caption:"Categories",
+            caption:"Customers",
             emptyrecords: "Empty records",
             loadonce: false,
             loadComplete: function() {},
@@ -39,11 +51,11 @@ $(document).ready(function() {
                 records: "records",
                 repeatitems: false,
                 cell: "cell",
-                id: "id"
+                id: "customerId"
             }
         });
     
-        $("#categoryGrid").jqGrid('navGrid','#categoryPager',
+        $("#customerGrid").jqGrid('navGrid','#customerPager',
                 {edit:false, add:false, del:false, search:true},
                 {}, {}, {}, 
                 {   // search
@@ -54,30 +66,30 @@ $(document).ready(function() {
                 }
         );
         
-        $("#categoryGrid").navButtonAdd('#categoryPager',
+        $("#customerGrid").navButtonAdd('#customerPager',
                 {   caption:"Add", 
                     buttonicon:"ui-icon-plus", 
-                    onClickButton: addCategoryRow,
+                    onClickButton: addCustomerRow,
                     position: "last", 
                     title:"", 
                     cursor: "pointer"
                 } 
         );
         
-        $("#categoryGrid").navButtonAdd('#categoryPager',
+        $("#customerGrid").navButtonAdd('#customerPager',
                 {   caption:"Edit", 
                     buttonicon:"ui-icon-pencil", 
-                    onClickButton: editCategoryRow,
+                    onClickButton: editCustomerRow,
                     position: "last", 
                     title:"", 
                     cursor: "pointer"
                 } 
         );
         
-        $("#categoryGrid").navButtonAdd('#categoryPager',
+        $("#customerGrid").navButtonAdd('#customerPager',
             {   caption:"Delete", 
                 buttonicon:"ui-icon-trash", 
-                onClickButton: deleteCategoryRow,
+                onClickButton: deleteCustomerRow,
                 position: "last", 
                 title:"", 
                 cursor: "pointer"
@@ -85,25 +97,29 @@ $(document).ready(function() {
         );
     
         // Toolbar Search
-        $("#categoryGrid").jqGrid('filterToolbar',{stringResult: true,searchOnEnter : true, defaultSearch:"cn"});
+        $("#customerGrid").jqGrid('filterToolbar',{stringResult: true,searchOnEnter : true, defaultSearch:"cn"});
         
-        //$("#categoryGrid").jqGrid('setGridHeight', $("#categoryJqgrid").height() – ($("#gbox_grid").height() – $('#gbox_grid .ui-jqgrid-bdiv').height()));
+        //$("#customerGrid").jqGrid('setGridHeight', $("#customerJqgrid").height() – ($("#gbox_grid").height() – $('#gbox_grid .ui-jqgrid-bdiv').height()));
     });
 });
 
-$(window).resize(function() {
-    $("#categoryGrid").jqGrid('setGridWidth', $("#categoryJqgrid").width()-5, true);
-}).trigger('resize');
-
-
-function addCategoryRow() {
-    $("#categoryGrid").jqGrid('setColProp', 'name', {editoptions:{readonly:false, size:10}});
-    $("#categoryGrid").jqGrid('setColProp', 'description', {editoptions:{readonly:false, size:10}});
+function addCustomerRow() {
+    $("#customerGrid").jqGrid('setColProp', 'customerId', {editoptions:{readonly:false, size:10}});
+    $("#customerGrid").jqGrid('setColProp', 'companyNm', {editoptions:{readonly:false, size:10}});
+    $("#customerGrid").jqGrid('setColProp', 'contactNm', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'contactTitle', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'address', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'city', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'region', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'postalCode', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'country', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'phone', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'fax', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
     
     // Get the currently selected row
-    $('#categoryGrid').jqGrid('editGridRow','new',
+    $('#customerGrid').jqGrid('editGridRow','new',
             {
-                url: categoryUrls.createUrl,
+                url: customerUrls.createUrl,
                 datatype: 'json',
                 editData: {},
                 ajaxEditOptions: {
@@ -137,8 +153,8 @@ function addCategoryRow() {
                             errors +=  result.messages[i] + "<br/>";
                         }
                     }  else {
-                        $('#categoryMsgbox').text('Entry has been added successfully');
-                        $('#categoryMsgbox').dialog( 
+                        $('#customerMsgbox').text('Entry has been added successfully');
+                        $('#customerMsgbox').dialog( 
                                 {   title: 'Success',
                                     modal: true,
                                     buttons: {"Ok": function()  {
@@ -152,20 +168,29 @@ function addCategoryRow() {
                     return [result.success, errors, newId];
                 }
             });
-} // end of addCategoryRow
+} // end of addCustomerRow
 
 
-function editCategoryRow() {
-    $("#categoryGrid").jqGrid('setColProp', 'name', {editoptions:{readonly:false, size:10}});
-    $("#categoryGrid").jqGrid('setColProp', 'description', {editoptions:{readonly:false, size:10}});
+function editCustomerRow() {
+    $("#customerGrid").jqGrid('setColProp', 'customerId', {editoptions:{readonly:false, size:10}});
+    $("#customerGrid").jqGrid('setColProp', 'companyNm', {editoptions:{readonly:false, size:10}});
+    $("#customerGrid").jqGrid('setColProp', 'contactNm', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'contactTitle', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'address', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'city', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'region', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'postalCode', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'country', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'phone', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
+    $("#customerGrid").jqGrid('setColProp', 'fax', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
     
     // Get the currently selected row
-    var row = $('#categoryGrid').jqGrid('getGridParam','selrow');
+    var row = $('#customerGrid').jqGrid('getGridParam','selrow');
     
     if( row != null ) {
     
-        $('#categoryGrid').jqGrid('editGridRow', row,
-            {   url: categoryUrls.updateUrl, 
+        $('#customerGrid').jqGrid('editGridRow', row,
+            {   url: customerUrls.updateUrl, 
                 editData: {},
                 ajaxEditOptions: {
                     dataType: 'json',
@@ -199,8 +224,8 @@ function editCategoryRow() {
                             errors +=  result.messages[i] + "<br/>";
                         }
                     }  else {
-                        $('#categoryMsgbox').text('Entry has been edited successfully');
-                        $('#categoryMsgbox').dialog( 
+                        $('#customerMsgbox').text('Entry has been edited successfully');
+                        $('#customerMsgbox').dialog( 
                                 {   title: 'Success',
                                     modal: true,
                                     buttons: {"Ok": function()  {
@@ -215,8 +240,8 @@ function editCategoryRow() {
                 }
             });
     } else {
-        $('#categoryMsgbox').text('You must select a record first!');
-        $('#categoryMsgbox').dialog( 
+        $('#customerMsgbox').text('You must select a record first!');
+        $('#customerMsgbox').dialog( 
                 {   title: 'Error',
                     modal: true,
                     buttons: {"Ok": function()  {
@@ -226,14 +251,14 @@ function editCategoryRow() {
     }
 }
 
-function deleteCategoryRow() {
+function deleteCustomerRow() {
     // Get the currently selected row
-    var row = $('#categoryGrid').jqGrid('getGridParam','selrow');
+    var row = $('#customerGrid').jqGrid('getGridParam','selrow');
 
     // A pop-up dialog will appear to confirm the selected action
     if( row != null ) 
-        $('#categoryGrid').jqGrid( 'delGridRow', row,
-            {   url: categoryUrls.deleteUrl, 
+        $('#customerGrid').jqGrid( 'delGridRow', row,
+            {   url: customerUrls.deleteUrl, 
                 recreateForm: true,
                 beforeShowForm: function(form) {
                     //Change title
@@ -246,7 +271,7 @@ function deleteCategoryRow() {
                 reloadAfterSubmit:true,
                 closeAfterDelete: true,
                 serializeDelData: function (postdata) {
-                      var rowdata = $('#categoryGrid').getRowData(postdata.id);
+                      var rowdata = $('#customerGrid').getRowData(postdata.id);
                       // append postdata with any information 
                       return {id: rowdata.id, oper: postdata.oper, username: rowdata.username};
                 },
@@ -260,8 +285,8 @@ function deleteCategoryRow() {
                             errors +=  result.messages[i] + "<br/>";
                         }
                     }  else {
-                        $('#categoryMsgbox').text('Entry has been deleted successfully');
-                        $('#categoryMsgbox').dialog( 
+                        $('#customerMsgbox').text('Entry has been deleted successfully');
+                        $('#customerMsgbox').dialog( 
                                 {   title: 'Success',
                                     modal: true,
                                     buttons: {"Ok": function()  {
@@ -276,8 +301,8 @@ function deleteCategoryRow() {
                 }
             });
     else {
-        $('#categoryMsgbox').text('You must select a record first!');
-        $('#categoryMsgbox').dialog( 
+        $('#customerMsgbox').text('You must select a record first!');
+        $('#customerMsgbox').dialog( 
                 {   title: 'Error',
                     modal: true,
                     buttons: {"Ok": function()  {

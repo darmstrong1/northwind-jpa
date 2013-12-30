@@ -57,7 +57,7 @@ public class WebAppContextCategoryControllerTest {
         JqgridReply<CategoryDTO> reply = controller.list(false, null, 1, 10, "id", "asc");
         List<CategoryDTO> rows = reply.getRows();
         List<Category> categories = serviceMock.findAll();
-        List<CategoryDTO> catDTOs = Mapper.mapToCategoryDTOs(categories);
+        List<CategoryDTO> catDTOs = Mapper.mapDomainsToDTOs(categories);
         assertThat(rows, is(catDTOs));
     }
 

@@ -19,33 +19,36 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import co.da.nw.domain.Category;
-import co.da.nw.dto.CategoryDTO;
+import co.da.nw.dao.CustomerPredicates;
+import co.da.nw.domain.Customer;
+import co.da.nw.dto.CustomerDTO;
 import co.da.nw.dto.reply.JqgridReply;
 import co.da.nw.dto.reply.StatusReply;
-import co.da.nw.service.CategoryService;
+import co.da.nw.service.CustomerService;
 import co.da.nw.util.JqgridFilter;
 import co.da.nw.util.Mapper;
 
 import com.google.common.collect.ImmutableList;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.types.Predicate;
 
 @Controller
-@RequestMapping("/home/category")
-public class CategoryController {
+@RequestMapping("/home/customer")
+public class CustomerController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerController.class);
 
     @Resource
-    private CategoryService service;
+    private CustomerService service;
 
     @RequestMapping
-    public String getCategoryPage() {
-        return "home/category";
+    public String getCustomerPage() {
+        return "home/customer";
     }
 
     @RequestMapping(value = "/list", produces = "application/json")
     @ResponseBody
-    public JqgridReply<CategoryDTO> list(
+    public JqgridReply<CustomerDTO> list(
             @RequestParam("_search") Boolean search,
             @RequestParam(value = "filters", required = false) String filters,
             @RequestParam(value = "page", required = false) Integer page,
@@ -55,77 +58,107 @@ public class CategoryController {
 
         Pageable pageRequest = new PageRequest(page - 1, rows);
 
-        Page<Category> categories = search ? getFilteredRecords(filters, pageRequest) : service.findAll(pageRequest);
-        List<CategoryDTO> catDTOs = Mapper.mapDomainsToDTOs(categories);
+        // If search is true, filter out the records based on the filters String.
+        Page<Customer> categories = search ? getFilteredRecords(filters, pageRequest) : service.findAll(pageRequest);
+        List<CustomerDTO> customerDTOs = Mapper.mapDomainsToDTOs(categories);
 
         return new JqgridReply<>(
                 Integer.valueOf(categories.getNumber() + 1).toString(),
                 Integer.valueOf(categories.getTotalPages()).toString(),
                 Long.valueOf(categories.getTotalElements()).toString(),
-                catDTOs);
+                customerDTOs);
     }
 
-    public Page<Category> getFilteredRecords(String filters, Pageable pageRequest) {
-        String qCategoryName = null;
-        String qDescription = null;
+    /**
+     * Parse the JqgridFilter to build the predicates to use in our search.
+     * 
+     * @param filter
+     * @return
+     */
+    private Predicate buildPredicates(JqgridFilter filter) {
+        BooleanBuilder builder = new BooleanBuilder();
 
-        JqgridFilter filter = Mapper.map(filters);
         for (JqgridFilter.Rule rule : filter.getRules()) {
-            if (rule.getField().equals("name")) {
-                qCategoryName = rule.getData();
-            } else if (rule.getField().equals("description")) {
-                qDescription = rule.getData();
-            } else {
-                LOGGER.warn("Invalid field type: " + rule.getField());
+            String field = rule.getField();
+
+            switch (field) {
+            case "customerId":
+                builder.and(CustomerPredicates.customerIdIsLike(rule.getData()));
+                break;
+
+            case "companyNm":
+                builder.and(CustomerPredicates.companyNmIsLike(rule.getData()));
+                break;
+
+            case "contactNm":
+                builder.and(CustomerPredicates.contactNmIsLike(rule.getData()));
+                break;
+
+            case "contactTitle":
+                builder.and(CustomerPredicates.contactTitleIsLike(rule.getData()));
+                break;
+
+            case "address":
+                builder.and(CustomerPredicates.addressIsLike(rule.getData()));
+                break;
+
+            case "city":
+                builder.and(CustomerPredicates.cityIsLike(rule.getData()));
+                break;
+
+            case "region":
+                builder.and(CustomerPredicates.regionIsLike(rule.getData()));
+                break;
+
+            case "postalCode":
+                builder.and(CustomerPredicates.postalCdIsLike(rule.getData()));
+                break;
+
+            case "country":
+                builder.and(CustomerPredicates.countryIsLike(rule.getData()));
+                break;
+
+            case "phone":
+                builder.and(CustomerPredicates.phoneIsLike(rule.getData()));
+                break;
+
+            case "fax":
+                builder.and(CustomerPredicates.faxIsLike(rule.getData()));
+                break;
+
+            default:
+                LOGGER.warn("Unknown field type:" + field);
             }
         }
 
-        Page<Category> categories;
+        return builder.getValue();
+    }
 
-        if (qCategoryName != null && qDescription != null) {
-            categories = service.findByNameLikeAndDescriptionLike(qCategoryName, qDescription, pageRequest);
-        } else if (qCategoryName != null) {
-            categories = service.findByNameLike(qCategoryName, pageRequest);
-        } else if (qDescription != null) {
-            categories = service.findByDescriptionLike(qDescription, pageRequest);
-        } else {
-            // Just find all of them.
-            categories = service.findAll(pageRequest);
-        }
+    private Page<Customer> getFilteredRecords(String filters, Pageable pageRequest) {
 
-        return categories;
+        // Build the predicates to use for the filtered search.
+        Predicate predicates = buildPredicates(Mapper.map(filters));
+
+        return service.findAll(predicates, pageRequest);
     }
 
     @RequestMapping(value = "/get", produces = "application/json")
     @ResponseBody
-    public CategoryDTO get(@RequestBody CategoryDTO cat) {
-        List<Category> categories = service.findByName(cat.getName());
-        return categories == null ? null : Mapper.map(categories.get(0));
+    public CustomerDTO get(@RequestBody CustomerDTO dto) {
+        Customer customer = service.findById(dto.getCustomerId());
+        return customer == null ? null : Mapper.map(customer);
     }
-
-    // @RequestMapping(value = "/create", produces = "application/json", method
-    // = RequestMethod.POST)
-    // public @ResponseBody
-    // StatusReply create(@RequestParam String name, @RequestParam String
-    // description) {
-    //
-    // Category cat = new Category.Builder()
-    // .setDescription(description)
-    // .build(name);
-    //
-    // return new StatusReply(service.create(cat) != null);
-    // }
 
     @RequestMapping(value = "/create", produces = "application/json", consumes = "application/json",
             method = RequestMethod.POST)
     public @ResponseBody
-    StatusReply create(@Valid @RequestBody CategoryDTO dto, BindingResult result) {
+    StatusReply create(@Valid @RequestBody CustomerDTO dto, BindingResult result) {
 
         StatusReply reply;
 
         if (result.hasErrors()) {
 
-            LOGGER.error("Add category form contains errors:");
+            LOGGER.error("Add customer form contains errors:");
             ImmutableList.Builder<String> builder = new ImmutableList.Builder<>();
             for (ObjectError error : result.getAllErrors()) {
                 builder.add(error.getDefaultMessage());
@@ -144,7 +177,7 @@ public class CategoryController {
 
     @RequestMapping(value = "/update", produces = "application/json", method = RequestMethod.POST)
     public @ResponseBody
-    StatusReply update(@Valid @RequestBody CategoryDTO dto, BindingResult result) {
+    StatusReply update(@Valid @RequestBody CustomerDTO dto, BindingResult result) {
 
         StatusReply reply;
 
@@ -169,8 +202,9 @@ public class CategoryController {
 
     @RequestMapping(value = "/delete", produces = "application/json", method = RequestMethod.POST)
     public @ResponseBody
-    StatusReply delete(@RequestParam Long id) {
+    StatusReply delete(@RequestParam String customerId) {
 
-        return new StatusReply(service.delete(id) != null);
+        return new StatusReply(service.delete(customerId) != null);
     }
+
 }

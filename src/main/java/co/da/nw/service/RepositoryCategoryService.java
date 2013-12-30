@@ -19,8 +19,7 @@ import co.da.nw.dto.CategoryDTO;
 @Service
 public class RepositoryCategoryService implements CategoryService {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(RepositoryCategoryService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryCategoryService.class);
 
     @Resource
     private CategoryRepository repository;

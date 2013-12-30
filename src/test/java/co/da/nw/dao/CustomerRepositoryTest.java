@@ -9,6 +9,9 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -33,10 +36,11 @@ public class CustomerRepositoryTest {
     @Test
     public void testFindByCompanyNm() {
         String companyNm = "QUICK-Stop";
+        Pageable pageRequest = new PageRequest(0, 10);
 
-        List<Customer> customers = repository.findByCompanyNm(companyNm);
-        assertThat(customers.size(), is(1));
-        assertThat(customers.get(0).getCompanyNm(), is(companyNm));
+        Page<Customer> customers = repository.findAll(CustomerPredicates.companyNmIs(companyNm), pageRequest);
+        assertThat(customers.getContent().size(), is(1));
+        assertThat(customers.getContent().get(0).getCompanyNm(), is(companyNm));
     }
 
     @Test
@@ -70,7 +74,7 @@ public class CustomerRepositoryTest {
                 .setAddress("123 Main").setCity("Nashville").setPostalCode("37217").setCountry("US")
                 .setPhone("615-222-2222")
                 .build();
-        Customer cust2 = new Customer.Builder("DLLC", "APPS").setContactNm("David Smith").setContactTitle("Owner")
+        Customer cust2 = new Customer.Builder("DLLCA", "APPS").setContactNm("David Smith").setContactTitle("Owner")
                 .setAddress("123 Main").setCity("Memphis").setPostalCode("38111").setCountry("US")
                 .setPhone("901-222-2222")
                 .build();

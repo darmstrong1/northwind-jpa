@@ -28,29 +28,38 @@
     <%--<link href="/resources/jtable/2.3.1/themes/metro/blue/jtable.css" rel="stylesheet" type="text/css" />       
     <script type="text/javascript" src="/resources/jtable/2.3.1/jquery.jtable.js" ></script> --%>
     
-    <%-- Customized javascripts --%>
+    <%-- Customized javascripts for tables --%>
+    <script type="text/javascript" src="/resources/js/util.js"></script>
     <script type="text/javascript" src="/resources/js/category.js"></script>
+    <script type="text/javascript" src="/resources/js/customer.js"></script>
     
 </head>
 <body>
     <h1><a href="<c:url value="/" />">Northwind-JPA</a></h1>
     <div id="tabs">
 	    <ul>
-	        <li><a href="#category">Category</a></li>
-	        <li><a href="#customer">Customer</a></li>
+            <li><a href="#category">Category</a></li>
+            <li><a href="#customer">Customer</a></li>
 	    </ul>
+        
 	    <div id = "category">
-	        <div id = 'jqgrid'>
-	            <table id = 'grid'></table>
-	            <div id = 'pager'></div>
+	        <div id = 'categoryJqgrid'>
+	            <table id = 'categoryGrid'></table>
+	            <div id = 'categoryPager'></div>
 	        </div>
 	        
-	        <div id='msgbox' title='' style='display:none'></div>
+	        <div id='categoryMsgbox' title='' style='display:none'></div>
 	    </div>
-	    
-	    <div id = "customer">
-	        <p>This is the customer section</p>
-	    </div>
+        
+        <div id = "customer">
+            <div id = 'customerJqgrid'>
+                <table id = 'customerGrid'></table>
+                <div id = 'customerPager'></div>
+            </div>
+            
+            <div id='customerMsgbox' title='' style='display:none'></div>
+        </div>
+    
     </div>
     
     <script type="text/javascript">
@@ -64,7 +73,10 @@
             // http://docs.jquery.com/UI/API/1.8/Tabs#Back_button_and_bookmarking
 
             $("#tabs").bind("tabsselect", function(event, ui) { window.location.hash = ui.tab.hash; });
-        });    
+            
+            
+        });
+        
     </script>
     
 </body>

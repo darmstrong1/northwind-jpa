@@ -83,7 +83,18 @@ public class CustomerDTO implements Serializable {
             String country,
             String phone,
             String fax) {
-
+        
+        this.customerId = customerId;
+        this.companyNm = companyNm;
+        this.contactNm = contactNm;
+        this.contactTitle = contactTitle;
+        this.address = address;
+        this.city = city;
+        this.region = region;
+        this.postalCode = postalCode;
+        this.country = country;
+        this.phone = phone;
+        this.fax = fax;
     }
 
     public String getCustomerId() {
