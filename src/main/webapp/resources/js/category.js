@@ -1,4 +1,4 @@
-var category = namespace('northwind.category');
+var category = namespace('co.da.nw.category');
 
 category.urls = {
         'listUrl' : '/home/category/list',
@@ -121,7 +121,7 @@ category.addRow = function() {
                 serializeEditData: function(data){
                     // Set the id to 0 since this is a new row. The id will get assigned when the object is persisted.
                     data.id = 0;
-                    return convertToJSON(data);
+                    return util.convertToJSON(data);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {
@@ -183,7 +183,7 @@ category.editRow = function() {
                 },
                 serializeEditData: function(data){
                     // Send it as JSON.
-                    return convertToJSON(data);
+                    return util.convertToJSON(data);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {

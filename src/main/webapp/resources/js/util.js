@@ -1,8 +1,10 @@
+var util = namespace('co.da.nw.util');
+
 // This function takes a data object and converts it to JSON. The data object should have
 // an oper key/value. Remove that before converting to JSON and afterward, put it back.
 // If oper is undefined, just convert to JSON. add is a boolean. If it is true, set the
 // id to 0.
-function convertToJSON(data) {
+util.convertToJSON = function(data) {
     var operVal = data.oper;
     var jdata;
     if(operVal != undefined) {

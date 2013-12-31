@@ -1,4 +1,4 @@
-var customer = namespace('northwind.customer');
+var customer = namespace('co.da.nw.customer');
 
 customer.urls = {
         'listUrl' : '/home/customer/list',
@@ -53,7 +53,7 @@ $(document).ready(function() {
                 records: "records",
                 repeatitems: false,
                 cell: "cell",
-                id: "customerId"
+                id: "0"
             }
         });
     
@@ -105,6 +105,15 @@ $(document).ready(function() {
     });
 });
 
+customer.convertToJSON = function(data) {
+    // Remove 'id' first since it's not needed on the server side.
+    var id = data.id;
+    delete data['id'];
+    var jdata = util.convertToJSON(data);
+    data.id = id;
+    return jdata;
+}
+
 customer.addRow = function() {
     $("#customerGrid").jqGrid('setColProp', 'customerId', {editoptions:{readonly:false, size:10}});
     $("#customerGrid").jqGrid('setColProp', 'companyNm', {editoptions:{readonly:false, size:10}});
@@ -135,7 +144,7 @@ customer.addRow = function() {
                     }
                 },
                 serializeEditData: function(data){
-                    return convertToJSON(data);
+                    return customer.convertToJSON(data);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {
@@ -206,7 +215,7 @@ customer.editRow = function() {
                 },
                 serializeEditData: function(data){
                     // Send it as JSON.
-                    return convertToJSON(data);
+                    return customer.convertToJSON(data);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {
