@@ -9,118 +9,128 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Immutable;
-
 import com.google.common.collect.ComparisonChain;
 
 @Entity
-@Table( name = "order_details" )
-@Immutable
+@Table(name = "order_details")
 public class OrderDetail implements DomainObject, Comparable<OrderDetail> {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	private final OrderDetailPk pk;
-	
-	@Column(name="unit_price")
-	private final BigDecimal unitPrice;
-	
-	@Column(name="quantity")
-	private final Integer quantity;
-	
-	@Column(name="discount")
-	private final BigDecimal discount;
-    
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    private final OrderDetailPk pk;
+
+    @Column(name = "unit_price")
+    private final BigDecimal unitPrice;
+
+    @Column(name = "quantity")
+    private final Integer quantity;
+
+    @Column(name = "discount")
+    private final BigDecimal discount;
+
     @Transient
     private volatile int hashCode;
-	
-	private OrderDetail() {
-		pk = null;
-		unitPrice = null;
-		quantity = null;
-		discount = null;
-	}
-	
-	public OrderDetail(OrderDetailPk pk,
-			BigDecimal unitPrice,
-			Integer quantity,
-			BigDecimal discount) {
-		
-		this.pk = pk;
-		this.unitPrice = unitPrice;
-		this.quantity = quantity;
-		this.discount = discount;
-	}
-	
-	public OrderDetailPk getPk() { return pk; }
-	public BigDecimal getUnitPrice() { return unitPrice; }
-	public Integer getQuantity() { return quantity; }
-	public BigDecimal getDiscount() { return discount; }
-	
-	public OrderDetail setPk(OrderDetailPk pk) {
-		return new OrderDetail(pk,
-				unitPrice,
-				quantity,
-				discount);
-	}
-	
-	public OrderDetail setUnitPrice(BigDecimal unitPrice) {
-		return new OrderDetail(pk,
-				unitPrice,
-				quantity,
-				discount);
-	}
-	
-	public OrderDetail setQuantity(Integer quantity) {
-		return new OrderDetail(pk,
-				unitPrice,
-				quantity,
-				discount);
-	}
-	
-	public OrderDetail setDiscount(BigDecimal discount) {
-		return new OrderDetail(pk,
-				unitPrice,
-				quantity,
-				discount);
-	}
-	
-	@Override
-	public String toString() {
+
+    private OrderDetail() {
+        pk = null;
+        unitPrice = null;
+        quantity = null;
+        discount = null;
+    }
+
+    public OrderDetail(OrderDetailPk pk,
+            BigDecimal unitPrice,
+            Integer quantity,
+            BigDecimal discount) {
+
+        this.pk = pk;
+        this.unitPrice = unitPrice;
+        this.quantity = quantity;
+        this.discount = discount;
+    }
+
+    public OrderDetailPk getPk() {
+        return pk;
+    }
+
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    public OrderDetail setPk(OrderDetailPk pk) {
+        return new OrderDetail(pk,
+                unitPrice,
+                quantity,
+                discount);
+    }
+
+    public OrderDetail setUnitPrice(BigDecimal unitPrice) {
+        return new OrderDetail(pk,
+                unitPrice,
+                quantity,
+                discount);
+    }
+
+    public OrderDetail setQuantity(Integer quantity) {
+        return new OrderDetail(pk,
+                unitPrice,
+                quantity,
+                discount);
+    }
+
+    public OrderDetail setDiscount(BigDecimal discount) {
+        return new OrderDetail(pk,
+                unitPrice,
+                quantity,
+                discount);
+    }
+
+    @Override
+    public String toString() {
         return com.google.common.base.Objects.toStringHelper(this)
                 .add("pk", pk)
                 .add("unitPrice", unitPrice)
                 .add("quantity", quantity)
                 .add("discount", discount)
                 .toString();
-	}
-	
-	@Override
-	public boolean equals(Object o) {
-        if(o == this) return true;
-        if(!(o instanceof OrderDetail)) return false;
-        OrderDetail od = (OrderDetail)o;
-        
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof OrderDetail))
+            return false;
+        OrderDetail od = (OrderDetail) o;
+
         return pk.equals(od.pk) &&
                 unitPrice.equals(od.unitPrice) &&
                 quantity.equals(od.quantity) &&
                 discount.equals(od.discount);
-	}
-	
-	@Override
-	public int hashCode() {
+    }
+
+    @Override
+    public int hashCode() {
         int result = hashCode;
-        if(result == 0) {
+        if (result == 0) {
             result = Objects.hash(pk, unitPrice, quantity, discount);
             hashCode = result;
         }
-        
+
         return result;
-	}
+    }
 
     @Override
     public int compareTo(OrderDetail o) {
@@ -130,7 +140,7 @@ public class OrderDetail implements DomainObject, Comparable<OrderDetail> {
                 .compare(quantity, o.quantity)
                 .compare(discount, o.discount)
                 .result();
-        
+
         return diff;
     }
 

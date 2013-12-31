@@ -8,15 +8,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Immutable;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 
 @Entity
 @Table(name = "customers")
-@Immutable
 public final class Customer implements DomainObject, Comparable<Customer> {
 
     public static final int MAX_LENGTH_CUSTOMER_ID = 5;

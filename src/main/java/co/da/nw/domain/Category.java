@@ -19,7 +19,6 @@ import com.google.common.primitives.UnsignedBytes;
 
 @Entity
 @Table(name = "categories")
-// @Immutable
 public final class Category implements DomainObject, Comparable<Category> {
 
     public static final int MAX_LENGTH_CATEGORY_NAME = 15;
