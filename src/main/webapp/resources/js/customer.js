@@ -1,4 +1,6 @@
-var customerUrls = {
+var customer = namespace('northwind.customer');
+
+customer.urls = {
         'listUrl' : '/home/customer/list',
         'createUrl' : '/home/customer/create',
         'updateUrl' : '/home/customer/update',
@@ -12,7 +14,7 @@ $(window).resize(function() {
 $(document).ready(function() {
     $(function() {
         $("#customerGrid").jqGrid({
-            url: customerUrls.listUrl,
+            url: customer.urls.listUrl,
             datatype: 'json',
             mtype: 'GET',
             colNames:['Id', 'Company Name', 'Contact Name', 'Contact Title', 'Address', 'City', 'Region',
@@ -69,7 +71,7 @@ $(document).ready(function() {
         $("#customerGrid").navButtonAdd('#customerPager',
                 {   caption:"Add", 
                     buttonicon:"ui-icon-plus", 
-                    onClickButton: addCustomerRow,
+                    onClickButton: customer.addRow,
                     position: "last", 
                     title:"", 
                     cursor: "pointer"
@@ -79,7 +81,7 @@ $(document).ready(function() {
         $("#customerGrid").navButtonAdd('#customerPager',
                 {   caption:"Edit", 
                     buttonicon:"ui-icon-pencil", 
-                    onClickButton: editCustomerRow,
+                    onClickButton: customer.editRow,
                     position: "last", 
                     title:"", 
                     cursor: "pointer"
@@ -89,7 +91,7 @@ $(document).ready(function() {
         $("#customerGrid").navButtonAdd('#customerPager',
             {   caption:"Delete", 
                 buttonicon:"ui-icon-trash", 
-                onClickButton: deleteCustomerRow,
+                onClickButton: customer.deleteRow,
                 position: "last", 
                 title:"", 
                 cursor: "pointer"
@@ -103,7 +105,7 @@ $(document).ready(function() {
     });
 });
 
-function addCustomerRow() {
+customer.addRow = function() {
     $("#customerGrid").jqGrid('setColProp', 'customerId', {editoptions:{readonly:false, size:10}});
     $("#customerGrid").jqGrid('setColProp', 'companyNm', {editoptions:{readonly:false, size:10}});
     $("#customerGrid").jqGrid('setColProp', 'contactNm', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
@@ -119,7 +121,7 @@ function addCustomerRow() {
     // Get the currently selected row
     $('#customerGrid').jqGrid('editGridRow','new',
             {
-                url: customerUrls.createUrl,
+                url: customer.urls.createUrl,
                 datatype: 'json',
                 editData: {},
                 ajaxEditOptions: {
@@ -133,7 +135,7 @@ function addCustomerRow() {
                     }
                 },
                 serializeEditData: function(data){
-                    return convertToJSON(data, true);
+                    return convertToJSON(data);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {
@@ -168,10 +170,10 @@ function addCustomerRow() {
                     return [result.success, errors, newId];
                 }
             });
-} // end of addCustomerRow
+} // end of customer.addRow
 
 
-function editCustomerRow() {
+customer.editRow = function() {
     $("#customerGrid").jqGrid('setColProp', 'customerId', {editoptions:{readonly:false, size:10}});
     $("#customerGrid").jqGrid('setColProp', 'companyNm', {editoptions:{readonly:false, size:10}});
     $("#customerGrid").jqGrid('setColProp', 'contactNm', {editoptions:{readonly:false, size:10}}, {editrules:{required:false}});
@@ -190,7 +192,7 @@ function editCustomerRow() {
     if( row != null ) {
     
         $('#customerGrid').jqGrid('editGridRow', row,
-            {   url: customerUrls.updateUrl, 
+            {   url: customer.urls.updateUrl, 
                 editData: {},
                 ajaxEditOptions: {
                     dataType: 'json',
@@ -204,7 +206,7 @@ function editCustomerRow() {
                 },
                 serializeEditData: function(data){
                     // Send it as JSON.
-                    return convertToJSON(data, false);
+                    return convertToJSON(data);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {
@@ -251,14 +253,14 @@ function editCustomerRow() {
     }
 }
 
-function deleteCustomerRow() {
+customer.deleteRow = function() {
     // Get the currently selected row
     var row = $('#customerGrid').jqGrid('getGridParam','selrow');
 
     // A pop-up dialog will appear to confirm the selected action
     if( row != null ) 
         $('#customerGrid').jqGrid( 'delGridRow', row,
-            {   url: customerUrls.deleteUrl, 
+            {   url: customer.urls.deleteUrl, 
                 recreateForm: true,
                 beforeShowForm: function(form) {
                     //Change title

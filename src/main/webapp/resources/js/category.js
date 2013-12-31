@@ -1,4 +1,6 @@
-var categoryUrls = {
+var category = namespace('northwind.category');
+
+category.urls = {
         'listUrl' : '/home/category/list',
         'createUrl' : '/home/category/create',
         'updateUrl' : '/home/category/update',
@@ -8,7 +10,7 @@ var categoryUrls = {
 $(document).ready(function() {
     $(function() {
         $("#categoryGrid").jqGrid({
-            url: categoryUrls.listUrl,
+            url: category.urls.listUrl,
             datatype: 'json',
             mtype: 'GET',
             colNames:['Id', 'Name', 'Description'],
@@ -57,7 +59,7 @@ $(document).ready(function() {
         $("#categoryGrid").navButtonAdd('#categoryPager',
                 {   caption:"Add", 
                     buttonicon:"ui-icon-plus", 
-                    onClickButton: addCategoryRow,
+                    onClickButton: category.addRow,
                     position: "last", 
                     title:"", 
                     cursor: "pointer"
@@ -67,7 +69,7 @@ $(document).ready(function() {
         $("#categoryGrid").navButtonAdd('#categoryPager',
                 {   caption:"Edit", 
                     buttonicon:"ui-icon-pencil", 
-                    onClickButton: editCategoryRow,
+                    onClickButton: category.editRow,
                     position: "last", 
                     title:"", 
                     cursor: "pointer"
@@ -77,7 +79,7 @@ $(document).ready(function() {
         $("#categoryGrid").navButtonAdd('#categoryPager',
             {   caption:"Delete", 
                 buttonicon:"ui-icon-trash", 
-                onClickButton: deleteCategoryRow,
+                onClickButton: category.deleteRow,
                 position: "last", 
                 title:"", 
                 cursor: "pointer"
@@ -96,14 +98,14 @@ $(window).resize(function() {
 }).trigger('resize');
 
 
-function addCategoryRow() {
+category.addRow = function() {
     $("#categoryGrid").jqGrid('setColProp', 'name', {editoptions:{readonly:false, size:10}});
     $("#categoryGrid").jqGrid('setColProp', 'description', {editoptions:{readonly:false, size:10}});
     
     // Get the currently selected row
     $('#categoryGrid').jqGrid('editGridRow','new',
             {
-                url: categoryUrls.createUrl,
+                url: category.urls.createUrl,
                 datatype: 'json',
                 editData: {},
                 ajaxEditOptions: {
@@ -117,7 +119,9 @@ function addCategoryRow() {
                     }
                 },
                 serializeEditData: function(data){
-                    return convertToJSON(data, true);
+                    // Set the id to 0 since this is a new row. The id will get assigned when the object is persisted.
+                    data.id = 0;
+                    return convertToJSON(data);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {
@@ -152,10 +156,10 @@ function addCategoryRow() {
                     return [result.success, errors, newId];
                 }
             });
-} // end of addCategoryRow
+} // end of category.addRow
 
 
-function editCategoryRow() {
+category.editRow = function() {
     $("#categoryGrid").jqGrid('setColProp', 'name', {editoptions:{readonly:false, size:10}});
     $("#categoryGrid").jqGrid('setColProp', 'description', {editoptions:{readonly:false, size:10}});
     
@@ -165,7 +169,7 @@ function editCategoryRow() {
     if( row != null ) {
     
         $('#categoryGrid').jqGrid('editGridRow', row,
-            {   url: categoryUrls.updateUrl, 
+            {   url: category.urls.updateUrl, 
                 editData: {},
                 ajaxEditOptions: {
                     dataType: 'json',
@@ -179,7 +183,7 @@ function editCategoryRow() {
                 },
                 serializeEditData: function(data){
                     // Send it as JSON.
-                    return convertToJSON(data, false);
+                    return convertToJSON(data);
                 },
                 recreateForm: true,
                 beforeShowForm: function(form) {
@@ -226,14 +230,14 @@ function editCategoryRow() {
     }
 }
 
-function deleteCategoryRow() {
+category.deleteRow = function() {
     // Get the currently selected row
     var row = $('#categoryGrid').jqGrid('getGridParam','selrow');
 
     // A pop-up dialog will appear to confirm the selected action
     if( row != null ) 
         $('#categoryGrid').jqGrid( 'delGridRow', row,
-            {   url: categoryUrls.deleteUrl, 
+            {   url: category.urls.deleteUrl, 
                 recreateForm: true,
                 beforeShowForm: function(form) {
                     //Change title
