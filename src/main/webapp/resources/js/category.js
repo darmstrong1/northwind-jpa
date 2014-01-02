@@ -7,96 +7,108 @@ category.urls = {
         'deleteUrl' : '/home/category/delete'
 };
 
-$(document).ready(function() {
-    $(function() {
-        $("#categoryGrid").jqGrid({
-            url: category.urls.listUrl,
-            datatype: 'json',
-            mtype: 'GET',
-            colNames:['Id', 'Name', 'Description'],
-            colModel:[
-                {name:'id',index:'id', width:55, editable:false, editoptions:{readonly:true, size:10}, hidden:true},
-                //{name:'categoryId',index:'categoryId', width:55, editable:false, editoptions:{readonly:true, size:10}},
-                {name:'name',index:'name', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}},
-                {name:'description',index:'description', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}}
-            ],
-            postData: {},
-            rowNum:10,
-            rowList:[10,20,40,60],
-            height: '100%',
-            autowidth: true,
-            rownumbers: true,
-            pager: '#categoryPager',
-            sortname: 'id',
-            viewrecords: true,
-            sortorder: "asc",
-            caption:"Categories",
-            emptyrecords: "Empty records",
-            loadonce: false,
-            loadComplete: function() {},
-            jsonReader : {
-                root: "rows",
-                page: "page",
-                total: "total",
-                records: "records",
-                repeatitems: false,
-                cell: "cell",
-                id: "id"
+// Define resizeTab function.
+category.resizeTab = function() {
+    $("#categoryGrid").jqGrid('setGridWidth', $("#categoryJqgrid").width()-5, true);
+}
+
+// Call resizeTab when the window resizes.
+$(window).resize(function() {
+    category.resizeTab();
+}).trigger('resize');
+
+category.load = function() {
+    $("#categoryGrid").jqGrid({
+        url: category.urls.listUrl,
+        datatype: 'json',
+        mtype: 'GET',
+        colNames:['Id', 'Name', 'Description'],
+        colModel:[
+            {name:'id',index:'id', width:55, editable:false, editoptions:{readonly:true, size:10}, hidden:true},
+            //{name:'categoryId',index:'categoryId', width:55, editable:false, editoptions:{readonly:true, size:10}},
+            {name:'name',index:'name', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}},
+            {name:'description',index:'description', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}}
+        ],
+        postData: {},
+        rowNum:10,
+        rowList:[10,20,40,60],
+        height: '100%',
+        autowidth: true,
+        rownumbers: true,
+        pager: '#categoryPager',
+        sortname: 'id',
+        viewrecords: true,
+        sortorder: "asc",
+        caption:"Categories",
+        emptyrecords: "Empty records",
+        loadonce: false,
+        loadComplete: function() {},
+        jsonReader : {
+            root: "rows",
+            page: "page",
+            total: "total",
+            records: "records",
+            repeatitems: false,
+            cell: "cell",
+            id: "id"
+        }
+    });
+
+    $("#categoryGrid").jqGrid('navGrid','#categoryPager',
+            {edit:false, add:false, del:false, search:true},
+            {}, {}, {}, 
+            {   // search
+                sopt:['cn', 'eq', 'ne', 'lt', 'gt', 'bw', 'ew'],
+                closeOnEscape: true, 
+                multipleSearch: true, 
+                closeAfterSearch: true
             }
-        });
+    );
     
-        $("#categoryGrid").jqGrid('navGrid','#categoryPager',
-                {edit:false, add:false, del:false, search:true},
-                {}, {}, {}, 
-                {   // search
-                    sopt:['cn', 'eq', 'ne', 'lt', 'gt', 'bw', 'ew'],
-                    closeOnEscape: true, 
-                    multipleSearch: true, 
-                    closeAfterSearch: true
-                }
-        );
-        
-        $("#categoryGrid").navButtonAdd('#categoryPager',
-                {   caption:"Add", 
-                    buttonicon:"ui-icon-plus", 
-                    onClickButton: category.addRow,
-                    position: "last", 
-                    title:"", 
-                    cursor: "pointer"
-                } 
-        );
-        
-        $("#categoryGrid").navButtonAdd('#categoryPager',
-                {   caption:"Edit", 
-                    buttonicon:"ui-icon-pencil", 
-                    onClickButton: category.editRow,
-                    position: "last", 
-                    title:"", 
-                    cursor: "pointer"
-                } 
-        );
-        
-        $("#categoryGrid").navButtonAdd('#categoryPager',
-            {   caption:"Delete", 
-                buttonicon:"ui-icon-trash", 
-                onClickButton: category.deleteRow,
+    $("#categoryGrid").navButtonAdd('#categoryPager',
+            {   caption:"Add", 
+                buttonicon:"ui-icon-plus", 
+                onClickButton: category.addRow,
                 position: "last", 
                 title:"", 
                 cursor: "pointer"
             } 
-        );
+    );
     
-        // Toolbar Search
-        $("#categoryGrid").jqGrid('filterToolbar',{stringResult: true,searchOnEnter : true, defaultSearch:"cn"});
-        
-        //$("#categoryGrid").jqGrid('setGridHeight', $("#categoryJqgrid").height() – ($("#gbox_grid").height() – $('#gbox_grid .ui-jqgrid-bdiv').height()));
-    });
+    $("#categoryGrid").navButtonAdd('#categoryPager',
+            {   caption:"Edit", 
+                buttonicon:"ui-icon-pencil", 
+                onClickButton: category.editRow,
+                position: "last", 
+                title:"", 
+                cursor: "pointer"
+            } 
+    );
+    
+    $("#categoryGrid").navButtonAdd('#categoryPager',
+        {   caption:"Delete", 
+            buttonicon:"ui-icon-trash", 
+            onClickButton: category.deleteRow,
+            position: "last", 
+            title:"", 
+            cursor: "pointer"
+        } 
+    );
+
+    // Toolbar Search
+    $("#categoryGrid").jqGrid('filterToolbar',{stringResult: true,searchOnEnter : true, defaultSearch:"cn"});
+    
+    //$("#categoryGrid").jqGrid('setGridHeight', $("#categoryJqgrid").height() – ($("#gbox_grid").height() – $('#gbox_grid .ui-jqgrid-bdiv').height()));
+}
+
+category.displayTab = function() {
+    category.resizeTab();
+}
+
+// This is the first tab, so load it at startup.
+$(document).ready(function() {
+    category.load();
 });
-
-$(window).resize(function() {
-    $("#categoryGrid").jqGrid('setGridWidth', $("#categoryJqgrid").width()-5, true);
-}).trigger('resize');
-
 
 category.addRow = function() {
     $("#categoryGrid").jqGrid('setColProp', 'name', {editoptions:{readonly:false, size:10}});

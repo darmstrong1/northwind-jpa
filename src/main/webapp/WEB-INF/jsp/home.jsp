@@ -32,6 +32,7 @@
     <script type="text/javascript" src="/resources/js/util.js"></script>
     <script type="text/javascript" src="/resources/js/category.js"></script>
     <script type="text/javascript" src="/resources/js/customer.js"></script>
+    <script type="text/javascript" src="/resources/js/tabs.js"></script>
     
 </head>
 <body>
@@ -59,25 +60,6 @@
             
             <div id='customerMsgbox' title='' style='display:none'></div>
         </div>
-    
     </div>
-    
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $("#tabs").tabs();
-
-            // Append '#' to the window location so "Back" returns to the selected tab
-            // after a redirect or a full page refresh (e.g. Views tab).
-
-            // However, note this general disclaimer about going back to previous tabs: 
-            // http://docs.jquery.com/UI/API/1.8/Tabs#Back_button_and_bookmarking
-
-            $("#tabs").bind("tabsselect", function(event, ui) { window.location.hash = ui.tab.hash; });
-            
-            
-        });
-        
-    </script>
-    
 </body>
 </html>

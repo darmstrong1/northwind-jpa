@@ -7,10 +7,117 @@ customer.urls = {
         'deleteUrl' : '/home/customer/delete'
 };
 
+//Define resizeTab function.
+customer.resizeTab = function() {
+    $("#customerGrid").jqGrid('setGridWidth', $("#customerJqgrid").width()-5, true);
+}
+
+//Call resizeTab when the window resizes.
 $(window).resize(function() {
     $("#customerGrid").jqGrid('setGridWidth', $("#customerJqgrid").width()-5, true);
 }).trigger('resize');
 
+customer.loaded = false;
+
+customer.load = function() {
+    $("#customerGrid").jqGrid({
+        url: customer.urls.listUrl,
+        datatype: 'json',
+        mtype: 'GET',
+        colNames:['Id', 'Company Name', 'Contact Name', 'Contact Title', 'Address', 'City', 'Region',
+                  'Postal Code', 'Country', 'Phone', 'Fax'],
+        colModel:[
+            {name:'customerId',index:'customerId', width:55, editable:true, editrules:{required:true},editoptions:{size:10}},
+            {name:'companyNm',index:'companyNm', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}},
+            {name:'contactNm',index:'contactNm', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+            {name:'contactTitle',index:'contactTitle', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+            {name:'address',index:'address', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+            {name:'city',index:'city', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+            {name:'region',index:'region', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+            {name:'postalCode',index:'postalCode', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+            {name:'country',index:'country', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+            {name:'phone',index:'phone', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}},
+            {name:'fax',index:'fax', width:100, editable:true, editrules:{required:false}, editoptions:{size:10}}
+        ],
+        postData: {},
+        rowNum:10,
+        rowList:[10,20,40,60],
+        height: '100%',
+        autowidth: true,
+        rownumbers: true,
+        pager: '#customerPager',
+        sortname: 'customerId',
+        viewrecords: true,
+        sortorder: "asc",
+        caption:"Customers",
+        emptyrecords: "Empty records",
+        loadonce: false,
+        loadComplete: function() {},
+        jsonReader : {
+            root: "rows",
+            page: "page",
+            total: "total",
+            records: "records",
+            repeatitems: false,
+            cell: "cell",
+            id: "0"
+        }
+    });
+
+    $("#customerGrid").jqGrid('navGrid','#customerPager',
+            {edit:false, add:false, del:false, search:true},
+            {}, {}, {}, 
+            {   // search
+                sopt:['cn', 'eq', 'ne', 'lt', 'gt', 'bw', 'ew'],
+                closeOnEscape: true, 
+                multipleSearch: true, 
+                closeAfterSearch: true
+            }
+    );
+    
+    $("#customerGrid").navButtonAdd('#customerPager',
+            {   caption:"Add", 
+                buttonicon:"ui-icon-plus", 
+                onClickButton: customer.addRow,
+                position: "last", 
+                title:"", 
+                cursor: "pointer"
+            } 
+    );
+    
+    $("#customerGrid").navButtonAdd('#customerPager',
+            {   caption:"Edit", 
+                buttonicon:"ui-icon-pencil", 
+                onClickButton: customer.editRow,
+                position: "last", 
+                title:"", 
+                cursor: "pointer"
+            } 
+    );
+    
+    $("#customerGrid").navButtonAdd('#customerPager',
+        {   caption:"Delete", 
+            buttonicon:"ui-icon-trash", 
+            onClickButton: customer.deleteRow,
+            position: "last", 
+            title:"", 
+            cursor: "pointer"
+        } 
+    );
+
+    // Toolbar Search
+    $("#customerGrid").jqGrid('filterToolbar',{stringResult: true,searchOnEnter : true, defaultSearch:"cn"});
+    
+}
+
+customer.displayTab = function() {
+    if(customer.loaded == false) {
+        customer.load();
+        customer.loaded = true;
+    }
+    customer.resizeTab();
+}
+/*
 $(document).ready(function() {
     $(function() {
         $("#customerGrid").jqGrid({
@@ -104,6 +211,7 @@ $(document).ready(function() {
         //$("#customerGrid").jqGrid('setGridHeight', $("#customerJqgrid").height() – ($("#gbox_grid").height() – $('#gbox_grid .ui-jqgrid-bdiv').height()));
     });
 });
+*/
 
 customer.convertToJSON = function(data) {
     // Remove 'id' first since it's not needed on the server side.
