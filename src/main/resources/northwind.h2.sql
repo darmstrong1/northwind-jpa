@@ -3577,6 +3577,8 @@ ALTER TABLE customers
 
 ALTER TABLE employees
     ADD CONSTRAINT pk_employees PRIMARY KEY (employee_id);
+ALTER TABLE employees
+    ADD CONSTRAINT fk_employees FOREIGN KEY (reports_to) REFERENCES employees (employee_id);
     
 ALTER TABLE employeeterritories
     ADD CONSTRAINT pk_employeeterritories PRIMARY KEY (employee_id, territory_id);

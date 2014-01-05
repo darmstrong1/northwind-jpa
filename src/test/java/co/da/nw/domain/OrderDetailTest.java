@@ -36,13 +36,13 @@ public class OrderDetailTest {
                 .setAddress("123 Main").setCity("Nashville").setPostalCode("37217").setCountry("US")
                 .setPhone("615-222-2222")
                 .build(); // case insensitive should be equal.
-        Customer cust3 = new Customer.Builder("DLLC", "APPS").setContactNm("David Smith").setContactTitle("Owner")
+        Customer cust3 = new Customer.Builder("DLLCA", "APPS").setContactNm("David Smith").setContactTitle("Owner")
                 .setAddress("123 Main").setCity("Memphis").setPostalCode("38111").setCountry("US")
                 .setPhone("901-222-2222")
                 .build();
 
         // Build the Employee objects.
-        Employee.Builder eBuilder = new Employee.Builder();
+        Employee.Builder eBuilder = new Employee.Builder("Richards", "Jeff");
         eBuilder.setTitle("Programmer")
                 .setBirthDate(new LocalDateTime("1972-04-15"))
                 .setHireDate(new LocalDateTime("2004-06-01"))
@@ -53,9 +53,9 @@ public class OrderDetailTest {
                 .setCountry("USA")
                 .setHomePhone("615-222-2222");
 
-        Employee e1 = eBuilder.build("Richards", "Jeff");
-        Employee e2 = eBuilder.build("Richards", "Jeff");
-        Employee e3 = eBuilder.setHireDate(new LocalDateTime("2011-09-15")).build("Richards", "Jeff");
+        Employee e1 = eBuilder.build();
+        Employee e2 = eBuilder.build();
+        Employee e3 = eBuilder.setHireDate(new LocalDateTime("2011-09-15")).build();
 
         // Now, the Shipper objects.
         Shipper s1 = new Shipper("ACME", "999-999-9999");

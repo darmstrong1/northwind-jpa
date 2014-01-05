@@ -23,7 +23,7 @@ public final class EmployeeTerritory implements DomainObject, Comparable<Employe
     private volatile int hashCode;
 
     private EmployeeTerritory() {
-        this(new EmployeeTerritoryPk(new Employee.Builder().build("", ""), new Territory("", "", new Region(""))));
+        this(new EmployeeTerritoryPk(new Employee.Builder("", "").build(), new Territory("", "", new Region(""))));
     }
 
     public EmployeeTerritory(EmployeeTerritoryPk pk) {

@@ -71,7 +71,8 @@ public final class Customer implements DomainObject, Comparable<Customer> {
          *            The Customer object to update. Any updates should be set by calling the appropriate set method.
          */
         public Builder(Customer customer) {
-            this(customer, customer.customerId, customer.companyNm);
+            this(customer, (customer == null ? null : customer.customerId), customer == null ? null
+                    : customer.companyNm);
         }
 
         /**
@@ -86,6 +87,8 @@ public final class Customer implements DomainObject, Comparable<Customer> {
          * @param companyNm
          */
         public Builder(Customer customer, String customerId, String companyNm) {
+            Preconditions.checkNotNull(customer, "customer must not be null");
+
             this.customer = customer;
             this.customerId = customerId;
             this.companyNm = companyNm;

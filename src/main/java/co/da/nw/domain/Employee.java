@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -23,6 +25,20 @@ import com.google.common.primitives.UnsignedBytes;
 @Table(name = "employees")
 public class Employee implements DomainObject, Comparable<Employee> {
 
+    public static final int MAX_LENGTH_LAST_NM = 20;
+    public static final int MAX_LENGTH_FIRST_NM = 10;
+    public static final int MAX_LENGTH_TITLE = 30;
+    public static final int MAX_LENGTH_TITLE_OF_COURTESY = 25;
+    public static final int MAX_LENGTH_ADDRESS = 60;
+    public static final int MAX_LENGTH_CITY = 15;
+    public static final int MAX_LENGTH_REGION = 15;
+    public static final int MAX_LENGTH_POSTAL_CD = 10;
+    public static final int MAX_LENGTH_COUNTRY = 15;
+    public static final int MAX_LENGTH_HOME_PHONE = 24;
+    public static final int MAX_LENGTH_EXTENSION = 4;
+    public static final int MAX_LENGTH_NOTES = 1024;
+    public static final int MAX_LENGTH_PHOTO_PATH = 255;
+
     /**
 	 * 
 	 */
@@ -30,6 +46,17 @@ public class Employee implements DomainObject, Comparable<Employee> {
 
     public static class Builder {
 
+        // This reference will save an Employee object that gets passed in the constructor for updating. When build is
+        // called, it will check to see if the built object is the same as this one. If it is, it will return this one
+        // to avoid publishing a duplicate object.
+        private final Employee employee;
+
+        // required
+        private final Integer employeeId;
+        private final String lastName;
+        private final String firstName;
+
+        // optional
         private String title;
         private String titleCourtesy;
         private LocalDateTime birthDate;
@@ -43,8 +70,43 @@ public class Employee implements DomainObject, Comparable<Employee> {
         private String extension;
         private byte[] photo;
         private String notes;
-        private Long reportsTo;
+        private Employee reportsTo;
         private String photoPath;
+
+        public Builder(String lastName, String firstName) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+            employeeId = null;
+            employee = null;
+        }
+
+        public Builder(Employee employee) {
+            this(employee, (employee == null ? null : employee.lastName), employee == null ? null : employee.firstName);
+        }
+
+        public Builder(Employee employee, String lastName, String firstName) {
+            Preconditions.checkNotNull(employee, "employee must not be null");
+            this.employee = employee;
+            employeeId = employee.employeeId;
+            this.lastName = lastName;
+            this.firstName = firstName;
+
+            title = employee.title;
+            titleCourtesy = employee.titleCourtesy;
+            birthDate = employee.birthDate;
+            hireDate = employee.hireDate;
+            address = employee.address;
+            city = employee.city;
+            region = employee.region;
+            postalCode = employee.postalCode;
+            country = employee.country;
+            homePhone = employee.homePhone;
+            extension = employee.extension;
+            photo = employee.photo;
+            notes = employee.notes;
+            reportsTo = employee.reportsTo;
+            photoPath = employee.photoPath;
+        }
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -111,7 +173,7 @@ public class Employee implements DomainObject, Comparable<Employee> {
             return this;
         }
 
-        public Builder setReportsTo(Long reportsTo) {
+        public Builder setReportsTo(Employee reportsTo) {
             this.reportsTo = reportsTo;
             return this;
         }
@@ -121,24 +183,75 @@ public class Employee implements DomainObject, Comparable<Employee> {
             return this;
         }
 
-        public Employee build(String lastName, String firstName) {
-            return new Employee(lastName,
-                    firstName,
-                    title,
-                    titleCourtesy,
-                    birthDate,
-                    hireDate,
-                    address,
-                    city,
-                    region,
-                    postalCode,
-                    country,
-                    homePhone,
-                    extension,
-                    photo,
-                    notes,
-                    reportsTo,
-                    photoPath);
+        public void validate() {
+            Preconditions.checkNotNull(lastName, "lastName cannot be null");
+            Preconditions.checkArgument(lastName.length() <= MAX_LENGTH_LAST_NM,
+                    "lastName must be less than or equal to %s characters", MAX_LENGTH_LAST_NM);
+
+            Preconditions.checkNotNull(firstName, "firstName cannot be null");
+            Preconditions.checkArgument(firstName.length() <= MAX_LENGTH_FIRST_NM,
+                    "firstName must be less than or equal to %s characters", MAX_LENGTH_FIRST_NM);
+
+            if (title != null) {
+                Preconditions.checkArgument(title.length() <= MAX_LENGTH_TITLE,
+                        "title must be less than or equal to %s characters", MAX_LENGTH_TITLE);
+            }
+
+            if (titleCourtesy != null) {
+                Preconditions.checkArgument(titleCourtesy.length() <= MAX_LENGTH_TITLE_OF_COURTESY,
+                        "titleCourtesy must be less than or equal to %s characters", MAX_LENGTH_TITLE_OF_COURTESY);
+            }
+
+            if (address != null) {
+                Preconditions.checkArgument(address.length() <= MAX_LENGTH_ADDRESS,
+                        "address must be less than or equal to %s characters", MAX_LENGTH_ADDRESS);
+            }
+
+            if (city != null) {
+                Preconditions.checkArgument(city.length() <= MAX_LENGTH_CITY,
+                        "city must be less than or equal to %s characters", MAX_LENGTH_CITY);
+            }
+
+            if (region != null) {
+                Preconditions.checkArgument(region.length() <= MAX_LENGTH_REGION,
+                        "region must be less than or equal to %s characters", MAX_LENGTH_REGION);
+            }
+
+            if (postalCode != null) {
+                Preconditions.checkArgument(postalCode.length() <= MAX_LENGTH_POSTAL_CD,
+                        "postalCode must be less than or equal to %s characters", MAX_LENGTH_POSTAL_CD);
+            }
+
+            if (country != null) {
+                Preconditions.checkArgument(country.length() <= MAX_LENGTH_COUNTRY,
+                        "country must be less than or equal to %s characters", MAX_LENGTH_COUNTRY);
+            }
+
+            if (homePhone != null) {
+                Preconditions.checkArgument(homePhone.length() <= MAX_LENGTH_HOME_PHONE,
+                        "homePhone must be less than or equal to %s characters", MAX_LENGTH_HOME_PHONE);
+            }
+
+            if (extension != null) {
+                Preconditions.checkArgument(extension.length() <= MAX_LENGTH_EXTENSION,
+                        "extension must be less than or equal to %s characters", MAX_LENGTH_EXTENSION);
+            }
+
+            if (notes != null) {
+                Preconditions.checkArgument(notes.length() <= MAX_LENGTH_NOTES,
+                        "notes must be less than or equal to %s characters", MAX_LENGTH_NOTES);
+            }
+
+            if (photoPath != null) {
+                Preconditions.checkArgument(photoPath.length() <= MAX_LENGTH_PHOTO_PATH,
+                        "photoPath must be less than or equal to %s characters", MAX_LENGTH_PHOTO_PATH);
+            }
+        }
+
+        public Employee build() {
+            validate();
+            Employee built = new Employee(this);
+            return built.equals(employee) ? employee : built;
         }
     }
 
@@ -195,8 +308,9 @@ public class Employee implements DomainObject, Comparable<Employee> {
     @Column(name = "notes")
     private final String notes;
 
-    @Column(name = "reports_to")
-    private final Long reportsTo;
+    @ManyToOne
+    @JoinColumn(name = "reports_to")
+    private final Employee reportsTo;
 
     @Column(name = "photo_path")
     private final String photoPath;
@@ -225,44 +339,28 @@ public class Employee implements DomainObject, Comparable<Employee> {
         photoPath = null;
     }
 
-    private Employee(String lastName,
-            String firstName,
-            String title,
-            String titleCourtesy,
-            LocalDateTime birthDate,
-            LocalDateTime hireDate,
-            String address,
-            String city,
-            String region,
-            String postalCode,
-            String country,
-            String homePhone,
-            String extension,
-            byte[] photo,
-            String notes,
-            Long reportsTo,
-            String photoPath) {
-        Preconditions.checkNotNull(lastName, "lastName cannot be null");
-        Preconditions.checkNotNull(firstName, "firstName cannot be null");
-        this.employeeId = null;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.title = title;
-        this.titleCourtesy = titleCourtesy;
-        this.birthDate = birthDate;
-        this.hireDate = hireDate;
-        this.address = address;
-        this.city = city;
-        this.region = region;
-        this.postalCode = postalCode;
-        this.country = country;
-        this.homePhone = homePhone;
-        this.extension = extension;
+    private Employee(Builder builder) {
+        Preconditions.checkNotNull(builder, "builder must not be null");
+
+        employeeId = builder.employeeId;
+        lastName = builder.lastName;
+        firstName = builder.firstName;
+        title = builder.title;
+        titleCourtesy = builder.titleCourtesy;
+        birthDate = builder.birthDate;
+        hireDate = builder.hireDate;
+        address = builder.address;
+        city = builder.city;
+        region = builder.region;
+        postalCode = builder.postalCode;
+        country = builder.country;
+        homePhone = builder.homePhone;
+        extension = builder.extension;
         // The Builder makes a copy of the byte array that gets passed to it, so no need to do so here.
-        this.photo = photo;
-        this.notes = notes;
-        this.reportsTo = reportsTo;
-        this.photoPath = photoPath;
+        photo = builder.photo;
+        notes = builder.notes;
+        reportsTo = builder.reportsTo;
+        photoPath = builder.photoPath;
     }
 
     public Integer getEmployeeId() {
@@ -329,7 +427,7 @@ public class Employee implements DomainObject, Comparable<Employee> {
         return notes;
     }
 
-    public Long getReportsTo() {
+    public Employee getReportsTo() {
         return reportsTo;
     }
 
@@ -338,343 +436,71 @@ public class Employee implements DomainObject, Comparable<Employee> {
     }
 
     public Employee setLastName(String lastName) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return this.lastName.equals(lastName) ? this : new Employee(new Builder(this, lastName, firstName));
     }
 
     public Employee setFirstName(String firstName) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return this.firstName.equals(firstName) ? this : new Employee(new Builder(this, lastName, firstName));
     }
 
     public Employee setTitle(String title) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setTitle(title));
     }
 
     public Employee setTitleCourtesy(String titleCourtesy) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setTitleCourtesy(titleCourtesy));
     }
 
     public Employee setBirthDate(LocalDateTime birthDate) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setBirthDate(birthDate));
     }
 
     public Employee setHireDate(LocalDateTime hireDate) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setHireDate(hireDate));
     }
 
     public Employee setAddress(String address) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setAddress(address));
     }
 
     public Employee setCity(String city) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setCity(city));
     }
 
     public Employee setRegion(String region) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setRegion(region));
     }
 
     public Employee setPostalCode(String postalCode) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setPostalCode(postalCode));
     }
 
     public Employee setCountry(String country) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setCountry(country));
     }
 
     public Employee setHomePhone(String homePhone) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setHomePhone(homePhone));
     }
 
     public Employee setExtension(String extension) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setExtension(extension));
     }
 
     public Employee setPhoto(byte[] photo) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo == null ? photo : Arrays.copyOf(photo, photo.length),
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setPhoto(photo));
     }
 
     public Employee setNotes(String notes) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setNotes(notes));
     }
 
-    public Employee setReportsTo(Long reportsTo) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+    public Employee setReportsTo(Employee reportsTo) {
+        return new Employee(new Builder(this).setReportsTo(reportsTo));
     }
 
     public Employee setPhotoPath(String photoPath) {
-        return new Employee(lastName,
-                firstName,
-                title,
-                titleCourtesy,
-                birthDate,
-                hireDate,
-                address,
-                city,
-                region,
-                postalCode,
-                country,
-                homePhone,
-                extension,
-                photo,
-                notes,
-                reportsTo,
-                photoPath);
+        return new Employee(new Builder(this).setPhotoPath(photoPath));
     }
 
     @Override

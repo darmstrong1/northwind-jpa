@@ -25,7 +25,7 @@ public class CustomerTest {
                 .setAddress("123 Main")
                 .setCity("Nashville").setPostalCode("37217").setCountry("US").setPhone("615-222-2222")
                 .build(); // case insensitive should be equal.
-        Customer cust3 = new Customer.Builder("DLLC", "APPS").setContactNm("David Smith").setContactTitle("Owner")
+        Customer cust3 = new Customer.Builder("DLLCA", "APPS").setContactNm("David Smith").setContactTitle("Owner")
                 .setAddress("123 Main")
                 .setCity("Memphis").setPostalCode("38111").setCountry("US").setPhone("901-222-2222")
                 .build();
@@ -59,7 +59,7 @@ public class CustomerTest {
                 .setAddress("123 Main").setCity("Nashville").setPostalCode("37217").setCountry("US")
                 .setPhone("615-222-2222")
                 .build(); // case insensitive should be equal.
-        Customer cust3 = new Customer.Builder("DLLC", "APPS").setContactNm("David Smith").setContactTitle("Owner")
+        Customer cust3 = new Customer.Builder("DLLCA", "APPS").setContactNm("David Smith").setContactTitle("Owner")
                 .setAddress("123 Main").setCity("Memphis").setPostalCode("38111").setCountry("US")
                 .setPhone("901-222-2222")
                 .build();
@@ -79,7 +79,7 @@ public class CustomerTest {
                 .setAddress("123 Main").setCity("Nashville").setPostalCode("37217").setCountry("US")
                 .setPhone("615-222-2222")
                 .build(); // case insensitive should be equal.
-        Customer cust3 = new Customer.Builder("DLLC", "APPS").setContactNm("David Smith").setContactTitle("Owner")
+        Customer cust3 = new Customer.Builder("DLLCA", "APPS").setContactNm("David Smith").setContactTitle("Owner")
                 .setAddress("123 Main").setCity("Memphis").setPostalCode("38111").setCountry("US")
                 .setPhone("901-222-2222")
                 .build();
